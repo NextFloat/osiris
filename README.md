@@ -1,2 +1,2 @@
 # osiris
-A user bot for revolt.chat
+A user bot for "revolt.chat"
