@@ -1,6 +1,7 @@
 const WebSocket = require('ws');
 const axios = require("axios")
-const ulid = require('ulid')
+const ulid = require('ulid');
+const { channel } = require('diagnostics_channel');
 const commands = {};
 const prefix = ">"
 /**
@@ -23,7 +24,7 @@ function addCommand(command, callback) {
  */
 function handleCommand(command, data, sharedObj) {
     command = command.slice(prefix.length)
-    command = command.split(" ")[0];
+    command = command.split(" ")[0].toLowerCase()
     if (commands[command]) {
         commands[command](data, sharedObj);
     } else {
@@ -295,6 +296,7 @@ function FetchUser(SessionToken, UserId){
    })
 }
 
+
 function getArgs(content) {
     return content.slice(prefix.length).trim().split(/ +/)
 }
@@ -305,7 +307,7 @@ function autoUser(id) {
 
 // F I R S T
 
-Login("Email", "Password").then(data => {
+Login("", "J").then(data => {
     console.log("[REVOLT]: Fetched login info, punchin' it in!")
     let Id = data._Id
     let UserId = data.User_Id
@@ -344,7 +346,23 @@ Login("Email", "Password").then(data => {
 
     ws.on('close', function open(r) {
         console.log(`[REVOLT]: Closed: ${r}`) 
-    })
+        console.log(`[REVOLT]: Disconnected.. Reconnecting`)
+        ws = new WebSocket('wss://ws.revolt.chat/', {
+        headers: {
+            Host: 'ws.revolt.chat',
+            Connection: 'Upgrade',
+            Pragma: 'no-cache',
+            'Cache-Control': 'no-cache',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) revolt-desktop/1.0.6 Chrome/98.0.4758.141 Electron/17.4.3 Safari/537.36',
+            Upgrade: 'websocket',
+            Origin: 'https',
+            'Sec-WebSocket-Version': '13',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Accept-Language': 'en-US',
+            'Sec-WebSocket-Key': 'DxRhe6fokGKthFBqPNrWVw==' //ah yes.
+        }
+    });
+})
     ws.on('message', async function incoming(data) {
         var Message;
         try {
@@ -432,8 +450,50 @@ Login("Email", "Password").then(data => {
                         SendMessage(XSessionToken, Channel, `${autoUser(User)} is ${Gayrate}% gay!`).then(message => {
                             console.log("[REVOLT]: SENT!")
                         })
+                    })
+                })
+
+                addCommand('8ball', (data, sharedObj) => {
+                    return new Promise((resolve, reject) => {
+                        const Content = data.Content
+                        const Channel = data.ChannelId
+                        const Args = getArgs(Content)
+                        const responses = ["It is certain.","It is decidedly so.","Without a doubt.","Yes - definitely.","You may rely on it.","As I see it, yes.","Most likely.","Outlook good.","Yes.","Signs point to yes.","Reply hazy, try again.","Ask again later.","Better not tell you now.","Cannot predict now.","Concentrate and ask again.","Don't count on it.","Outlook not so good.","My sources say no.","Very doubtful."];
+                        SendMessage(XSessionToken, Channel, " `` " + Args.slice(1).join(" ") + "\n" + responses[Math.floor(Math.random() * responses.length)] + " `` ").then(message => {
+                            console.log("[REVOLT]: SENT!")
+                        })
+                    })
+                })
+
+                addCommand('text', (data, sharedObj) => {
+                    return new Promise((resolve, reject) => {
+                        const Content = data.Content
+                        const Channel = data.ChannelId
+                        const Args = getArgs(Content)
+                        var types = ["big", "small"]
+                        const colors = ["red", "green", "blue", "pink", "purple","white", "magenta", "yellow", "orange", "brown", "crimson", "indianred", "salmon", "lightpink", "hotpink", "deeppink", "orangered", "gold", "violet", "blueviolet", "fuchsia", "indigo", "lime", "springgreen", "darkgreen", "lightgreen", "teal", "aqua", "turquoise", "lightskyblue", "royalblue", "navy", "gray", "black", "darkslategray"]
+                        if (!Args[1]?.toLowerCase()){
+                            return SendMessage(XSessionToken, Channel, `[REVOLT]: Invalid Color or no color provided. Options are: red, green, blue, pink, purple, white, magenta, yellow, orange, brown, crimson, indianred, salmon, lightpink, hotpink, deeppink, orangered, gold, violet, blueviolet, fuchsia, indigo, lime, springgreen, darkgreen, lightgreen, teal, aqua, turquoise, lightskyblue, royalblue, navy, gray, black, darkslategray`)
+                        }
+                        if (!Args[2]?.toLowerCase()){
+                            return SendMessage(XSessionToken, Channel, `[REVOLT]: Invalid type or no type provided. Options are: big, small`)
+                        }
+                        var prepare = colors.find(color => color.match(Args[1]))
+                        var prepare2 = types.find(type => type.match(Args[2]))
+
+                        if (!prepare){
+                            return SendMessage(XSessionToken, Channel, `[REVOLT]: Invalid Color or no color provided. Options are: red, green, blue, pink, purple, white, magenta, yellow, orange, brown, crimson, indianred, salmon, lightpink, hotpink, deeppink, orangered, gold, violet, blueviolet, fuchsia, indigo, lime, springgreen, darkgreen, lightgreen, teal, aqua, turquoise, lightskyblue, royalblue, navy, gray, black, darkslategray`)
+                        } else if (!prepare2){
+                            return SendMessage(XSessionToken, Channel, `[REVOLT]: Invalid type or no type provided. Options are: big, small`)
+                        } else if (!Args[3]){
+                            return SendMessage(XSessionToken, Channel, `[REVOLT]: Invalid messgae or no message provided. Options are: obviously whatever u want.`)
+                        }
+                        SendMessage(XSessionToken, Channel, `${Args[2] == ("big") ? "#" : ""} $\\color{${Args[1]}}\\textsf{${Args.slice(3).join(" ")}}$`).then(message => {
+                            console.log("[REVOLT]: SENT!")
+                        })
                     });
                 })
+                
 
                 break;
 
@@ -444,14 +504,15 @@ Login("Email", "Password").then(data => {
                 break;
 
             case "Message":
-                if (!Users[Message.author]){
+                if (!Users[Message.author] && Message.author !== "00000000000000000000000000"){
                     FetchUser(XSessionToken, Message.author).then(user => {
                         Users[Message.author] = {Username: user.UserName}
                         console.log(`[REVOLT]: Author ${Users[Message.author] ? Users[Message.author].Username : "UNKNOWN?"} (${Message.author}) sent ${Message.content}`)
                     })
+                } else {
+                    console.log(`[REVOLT]: Author ${Users[Message.author] ? Users[Message.author].Username : "UNKNOWN?"} (${Message.author}) sent ${Message.content}`)
                 }
-                console.log(`[REVOLT]: Author ${Users[Message.author] ? Users[Message.author].Username : "UNKNOWN?"} (${Message.author}) sent ${Message.content}`)
-                if (Message.content.startsWith(prefix)){
+                if (Message.content?.startsWith(prefix)){
                     handleCommand(Message.content, {
                         Author: Message.author,
                         ChannelId: Message.channel,
