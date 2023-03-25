@@ -1,0 +1,5 @@
+axios
+ws
+ulid
+@faker-js/faker
+figlet
