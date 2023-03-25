@@ -6,6 +6,7 @@ const { faker } = require('@faker-js/faker') //-- dont remove (for fake commands
 const figlet = require('figlet')
 const commands = {};
 const { email, password, prefix } = require('./config.json')
+
 /**
  * Command handler function.
  * @param {string} Command - The command to handle.
@@ -631,6 +632,23 @@ Login(email, password).then(data => {
                             url: "https://api.chucknorris.io/jokes/random"
                         }).then(response => {
                             SendMessage(XSessionToken, Channel, `${response.data.value}`).then(message => {
+                                console.log("[REVOLT]: SENT!")
+                            }).catch(error => {
+                                console.log(error)
+                            })
+                        })
+                    });
+                })
+
+                addCommand('dog', (data, sharedObj) => {
+                    return new Promise((resolve, reject) => {
+                        const Content = data.Content
+                        const Channel = data.ChannelId
+                        axios({
+                            method: "GET",
+                            url: "https://dog.ceo/api/breeds/image/random"
+                        }).then(response => {
+                            SendMessage(XSessionToken, Channel, `${response.data.message}`).then(message => {
                                 console.log("[REVOLT]: SENT!")
                             }).catch(error => {
                                 console.log(error)
