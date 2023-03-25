@@ -455,6 +455,18 @@ Login(email, password).then(data => {
                     })
                 })
 
+                addCommand('retardrate', (data, sharedObj) => {
+                    return new Promise((resolve, reject) => {
+                        const Content = data.Content
+                        const Channel = data.ChannelId
+                        const User = ScanForMentionsAndExtract(Content)
+                        const Retardrate = Math.floor(Math.random() * 101)
+                        SendMessage(XSessionToken, Channel, `${autoUser(User)} is ${Retardrate}% retarded!`).then(message => {
+                            console.log("[REVOLT]: SENT!")
+                        })
+                    })
+                })
+
                 addCommand('8ball', (data, sharedObj) => {
                     return new Promise((resolve, reject) => {
                         const Content = data.Content
@@ -562,6 +574,70 @@ Login(email, password).then(data => {
                     });
                 })
                 
+                addCommand('cock', (data, sharedObj) => {
+                    return new Promise((resolve, reject) => {
+                        const Content = data.Content
+                        const Channel = data.ChannelId
+                        const CockSizes = ['8=D', '8==D', '8===D', '8====D', '8=====D', '8======D', '8=======D', '8========D']
+                        const User = autoUser(ScanForMentionsAndExtract(Content))
+                        SendMessage(XSessionToken, Channel, `${User}'s cock is this large: ${CockSizes[Math.floor(Math.random() * responses.length)]}`).then(message => {
+                            console.log("[REVOLT]: SENT!")
+                        }).catch(error => {
+                            console.log(error)
+                        })
+                    });
+                })
+
+                addCommand('bird', (data, sharedObj) => {
+                    return new Promise((resolve, reject) => {
+                        const Content = data.Content
+                        const Channel = data.ChannelId
+                        axios({
+                            method: "GET",
+                            url: "https://some-random-api.ml/animal/bird"
+                        }).then(response => {
+                            SendMessage(XSessionToken, Channel, `${response.data.image}`).then(message => {
+                                console.log("[REVOLT]: SENT!")
+                            }).catch(error => {
+                                console.log(error)
+                            })
+                        })
+                    });
+                })
+
+                addCommand('kanye', (data, sharedObj) => {
+                    return new Promise((resolve, reject) => {
+                        const Content = data.Content
+                        const Channel = data.ChannelId
+                        axios({
+                            method: "GET",
+                            url: "https://api.kanye.rest/"
+                        }).then(response => {
+                            SendMessage(XSessionToken, Channel, `${response.data.quote}`).then(message => {
+                                console.log("[REVOLT]: SENT!")
+                            }).catch(error => {
+                                console.log(error)
+                            })
+                        })
+                    });
+                })
+
+                addCommand('chucknorris', (data, sharedObj) => {
+                    return new Promise((resolve, reject) => {
+                        const Content = data.Content
+                        const Channel = data.ChannelId
+                        axios({
+                            method: "GET",
+                            url: "https://api.chucknorris.io/jokes/random"
+                        }).then(response => {
+                            SendMessage(XSessionToken, Channel, `${response.data.value}`).then(message => {
+                                console.log("[REVOLT]: SENT!")
+                            }).catch(error => {
+                                console.log(error)
+                            })
+                        })
+                    });
+                })
 
                 break;
 
