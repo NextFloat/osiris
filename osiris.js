@@ -2,8 +2,10 @@ const WebSocket = require('ws');
 const axios = require("axios")
 const ulid = require('ulid');
 const { channel } = require('diagnostics_channel');
+const { faker } = require('@faker-js/faker') //-- dont remove (for fake commands in osiris)
+const figlet = require('figlet')
 const commands = {};
-const prefix = ">"
+const { email, password, prefix } = require('./config.json')
 /**
  * Command handler function.
  * @param {string} Command - The command to handle.
@@ -307,7 +309,7 @@ function autoUser(id) {
 
 // F I R S T
 
-Login("", "J").then(data => {
+Login(email, password).then(data => {
     console.log("[REVOLT]: Fetched login info, punchin' it in!")
     let Id = data._Id
     let UserId = data.User_Id
@@ -490,6 +492,72 @@ Login("", "J").then(data => {
                         }
                         SendMessage(XSessionToken, Channel, `${Args[2] == ("big") ? "#" : ""} $\\color{${Args[1]}}\\textsf{${Args.slice(3).join(" ")}}$`).then(message => {
                             console.log("[REVOLT]: SENT!")
+                        })
+                    });
+                })
+
+                addCommand('fake', (data, sharedObj) => {
+                    return new Promise((resolve, reject) => {
+                        const Content = data.Content
+                        const Channel = data.ChannelId
+                        const Args = getArgs(Content)
+                        const Mode = Args[1]
+                        switch (Mode) {
+                            case "address":
+                                SendMessage(XSessionToken, Channel, `${faker.address.streetAddress()}`).then(message => {
+                                    console.log("[REVOLT]: SENT!")
+                                })
+                                break;
+                            case "name":
+                                SendMessage(XSessionToken, Channel, `${faker.name.fullName()}`).then(message => {
+                                    console.log("[REVOLT]: SENT!")
+                                })
+                            default:
+                                console.log("[REVOLT] INVALID")
+                                break;
+                        }
+                    })
+                })
+
+                addCommand('spam', (data, sharedObj) => { //-- not meant for use, very high chance of getting ratelimited
+                    return new Promise((resolve, reject) => {
+                        const Content = data.Content
+                        const Channel = data.ChannelId
+                        const Args = getArgs(Content)
+                        const TimesToSpam = Args[1]
+                        const Text = Args.slice(2).join(" ")
+                        for (let i = 0; i < TimesToSpam; i++) {
+                            SendMessage(XSessionToken, Channel, `${Text}`).then(message => {
+                                console.log("[REVOLT]: SENT! [SPAMMED]")
+                            })
+                        }
+                    });
+                })
+
+                addCommand('ascii', (data, sharedObj) => { //-- not meant for use, very high chance of getting ratelimited
+                    return new Promise((resolve, reject) => {
+                        const Content = data.Content
+                        const Channel = data.ChannelId
+                        const Args = getArgs(Content)
+                        const Text = Args.slice(1).join(" ")
+                        figlet.text(Text, function (err, data) {
+                            if (!err) {
+                                SendMessage(XSessionToken, Channel, "```\n" + data + "```").then(message => {
+                                    console.log("[REVOLT]: SENT! [ASCII]")
+                                })
+                            }
+                        })
+                    });
+                })
+                
+                addCommand('ping', (data, sharedObj) => {
+                    return new Promise((resolve, reject) => {
+                        const Content = data.Content
+                        const Channel = data.ChannelId
+                        SendMessage(XSessionToken, Channel, "Pong!").then(message => {
+                            console.log("[REVOLT]: SENT!")
+                        }).catch(error => {
+                            console.log(error)
                         })
                     });
                 })
