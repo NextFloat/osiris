@@ -6,6 +6,7 @@ const { faker } = require('@faker-js/faker') //-- dont remove (for fake commands
 const figlet = require('figlet')
 const commands = {};
 const { email, password, prefix } = require('./config.json')
+console.clear()
 
 /**
  * Command handler function.
@@ -308,6 +309,10 @@ function autoUser(id) {
     return `<@${id}>`
 }
 
+function markdown(content) {
+    return "```ini\n[osiris]\n" + content
+}
+
 // F I R S T
 
 Login(email, password).then(data => {
@@ -555,7 +560,7 @@ Login(email, password).then(data => {
                         const Text = Args.slice(1).join(" ")
                         figlet.text(Text, function (err, data) {
                             if (!err) {
-                                SendMessage(XSessionToken, Channel, "```\n" + data + "```").then(message => {
+                                SendMessage(XSessionToken, Channel, "```\n" + data).then(message => {
                                     console.log("[REVOLT]: SENT! [ASCII]")
                                 })
                             }
@@ -655,6 +660,64 @@ Login(email, password).then(data => {
                             })
                         })
                     });
+                })
+
+                addCommand('robloxinfo', (data, sharedObj) => {
+                    return new Promise((resolve, reject) => {
+                        const Content = data.Content
+                        const Channel = data.ChannelId
+                        const id = getArgs(Content)[1]
+                        axios({
+                            method: "GET",
+                            url: `https://users.roblox.com/v1/users/${id}`
+                        }).then(response => {
+                            let Data = response.data
+                            let Description = Data.description
+                            let Created = Data.created
+                            let Name = Data.name
+                            let Display = Data.displayName
+                            SendMessage(XSessionToken, Channel, markdown(`Description: ${Description}\nCreated at: ${Created}\nName: ${Name}\nDisplay Name: ${Display}`)).then(message => {
+                                console.log("[REVOLT]: SENT!")
+                            }).catch(error => {
+                                console.log(error)
+                            })
+                        })
+                    });
+                })
+
+                addCommand('iq', (data, sharedObj) => {
+                    return new Promise((resolve, reject) => {
+                        const Content = data.Content
+                        const Channel = data.ChannelId
+                        const User = autoUser(ScanForMentionsAndExtract(Content))
+                        const IQ = Math.floor(Math.random() * 201)
+                        SendMessage(XSessionToken, Channel, `${User} has an iq of ${IQ}!`).then(message => {
+                            console.log("[REVOLT]: SENT!")
+                        })
+                    });
+                })
+
+                addCommand('invismsg', (data, sharedObj) => {
+                    return new Promise((resolve, reject) => {
+                        const Channel = data.ChannelId
+                        SendMessage(XSessionToken, Channel, `[ ]( )`).then(message => {
+                            console.log("[REVOLT]: SENT!")
+                        })
+                    })
+                })
+
+                addCommand('wyr', (data, sharedObj) => {
+                    return new Promise((resolve, reject) => {
+                        const Channel = data.ChannelId
+                        axios({
+                            method: 'GET',
+                            url: 'https://would-you-rather-api.abaanshanid.repl.co/'
+                        }).then(response => {
+                            SendMessage(XSessionToken, Channel, `${response.data.data}`).then(message => {
+                                console.log("[REVOLT]: SENT!")
+                            })
+                        })
+                    })
                 })
 
                 break;
