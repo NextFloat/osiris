@@ -580,7 +580,7 @@ Login(email, password).then(data => {
                         const Channel = data.ChannelId
                         const CockSizes = ['8=D', '8==D', '8===D', '8====D', '8=====D', '8======D', '8=======D', '8========D']
                         const User = autoUser(ScanForMentionsAndExtract(Content))
-                        SendMessage(XSessionToken, Channel, `${User}'s cock is this large: ${CockSizes[Math.floor(Math.random() * responses.length)]}`).then(message => {
+                        SendMessage(XSessionToken, Channel, `${User}'s cock is this large: ${CockSizes[Math.floor(Math.random() * CockSizes.length)]}`).then(message => {
                             console.log("[REVOLT]: SENT!")
                         }).catch(error => {
                             console.log(error)
