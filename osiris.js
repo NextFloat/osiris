@@ -3,7 +3,7 @@ const axios = require("axios")
 const ulid = require('ulid');
 const crypto = require('crypto');
 const commands = {};
-const prefix = ">"
+const { email, password, prefix } = require("./config.json")
 /**
  * Command handler function.
  * @param {string} Command - The command to handle.
@@ -480,7 +480,7 @@ function autoUser(id) {
 
 // F I R S T
 
-Login("", "").then(data => {
+Login(email, password).then(data => {
     console.log("[REVOLT]: Fetched login info, punchin' it in!")
     let Id = data._Id
     let UserId = data.User_Id
@@ -772,7 +772,145 @@ Login("", "").then(data => {
                     });
                 })
                 
-
+                addCommand('cock', (data, sharedObj) => {
+                    return new Promise((resolve, reject) => {
+                        const Content = data.Content
+                        const Channel = data.ChannelId
+                        const CockSizes = ['8=D', '8==D', '8===D', '8====D', '8=====D', '8======D', '8=======D', '8========D']
+                        const User = autoUser(ScanForMentionsAndExtract(Content))
+                        SendMessage(XSessionToken, Channel, `${User}'s cock is this large: ${CockSizes[Math.floor(Math.random() * CockSizes.length)]}`).then(message => {
+                            console.log("[REVOLT]: SENT!")
+                        }).catch(error => {
+                            console.log(error)
+                        })
+                    });
+                })
+                
+                addCommand('bird', (data, sharedObj) => {
+                    return new Promise((resolve, reject) => {
+                        const Content = data.Content
+                        const Channel = data.ChannelId
+                        axios({
+                            method: "GET",
+                            url: "https://some-random-api.ml/animal/bird"
+                        }).then(response => {
+                            SendMessage(XSessionToken, Channel, `${response.data.image}`).then(message => {
+                                console.log("[REVOLT]: SENT!")
+                            }).catch(error => {
+                                console.log(error)
+                            })
+                        })
+                    });
+                })
+                addCommand('kanye', (data, sharedObj) => {
+                    return new Promise((resolve, reject) => {
+                        const Content = data.Content
+                        const Channel = data.ChannelId
+                        axios({
+                            method: "GET",
+                            url: "https://api.kanye.rest/"
+                        }).then(response => {
+                            SendMessage(XSessionToken, Channel, `${response.data.quote}`).then(message => {
+                                console.log("[REVOLT]: SENT!")
+                            }).catch(error => {
+                                console.log(error)
+                            })
+                        })
+                    });
+                })
+                
+                addCommand('chucknorris', (data, sharedObj) => {
+                    return new Promise((resolve, reject) => {
+                        const Content = data.Content
+                        const Channel = data.ChannelId
+                        axios({
+                            method: "GET",
+                            url: "https://api.chucknorris.io/jokes/random"
+                        }).then(response => {
+                            SendMessage(XSessionToken, Channel, `${response.data.value}`).then(message => {
+                                console.log("[REVOLT]: SENT!")
+                            }).catch(error => {
+                                console.log(error)
+                            })
+                        })
+                    });
+                })
+                
+                addCommand('dog', (data, sharedObj) => {
+                    return new Promise((resolve, reject) => {
+                        const Content = data.Content
+                        const Channel = data.ChannelId
+                        axios({
+                            method: "GET",
+                            url: "https://dog.ceo/api/breeds/image/random"
+                        }).then(response => {
+                            SendMessage(XSessionToken, Channel, `${response.data.message}`).then(message => {
+                                console.log("[REVOLT]: SENT!")
+                            }).catch(error => {
+                                console.log(error)
+                            })
+                        })
+                    });
+                })
+                
+                addCommand('robloxinfo', (data, sharedObj) => {
+                    return new Promise((resolve, reject) => {
+                        const Content = data.Content
+                        const Channel = data.ChannelId
+                        const id = getArgs(Content)[1]
+                        axios({
+                            method: "GET",
+                            url: `https://users.roblox.com/v1/users/${id}`
+                        }).then(response => {
+                            let Data = response.data
+                            let Description = Data.description
+                            let Created = Data.created
+                            let Name = Data.name
+                            let Display = Data.displayName
+                            SendMessage(XSessionToken, Channel, markdown(`Description: ${Description}\nCreated at: ${Created}\nName: ${Name}\nDisplay Name: ${Display}`)).then(message => {
+                                console.log("[REVOLT]: SENT!")
+                            }).catch(error => {
+                                console.log(error)
+                            })
+                        })
+                    });
+                })
+                
+                addCommand('iq', (data, sharedObj) => {
+                    return new Promise((resolve, reject) => {
+                        const Content = data.Content
+                        const Channel = data.ChannelId
+                        const User = autoUser(ScanForMentionsAndExtract(Content))
+                        const IQ = Math.floor(Math.random() * 201)
+                        SendMessage(XSessionToken, Channel, `${User} has an iq of ${IQ}!`).then(message => {
+                            console.log("[REVOLT]: SENT!")
+                        })
+                    });
+                })
+                
+                addCommand('invismsg', (data, sharedObj) => {
+                    return new Promise((resolve, reject) => {
+                        const Channel = data.ChannelId
+                        SendMessage(XSessionToken, Channel, `[ ]( )`).then(message => {
+                            console.log("[REVOLT]: SENT!")
+                        })
+                    })
+                })
+                
+                addCommand('wyr', (data, sharedObj) => {
+                    return new Promise((resolve, reject) => {
+                        const Channel = data.ChannelId
+                        axios({
+                            method: 'GET',
+                            url: 'https://would-you-rather-api.abaanshanid.repl.co/'
+                        }).then(response => {
+                            SendMessage(XSessionToken, Channel, `${response.data.data}`).then(message => {
+                                console.log("[REVOLT]: SENT!")
+                            })
+                        })
+                    })
+                })
+                
                 break;
 
             case "ChannelStartTyping":
