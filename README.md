@@ -10,7 +10,7 @@ Osiris was made to enhance the user experience on revolt.chat!
 
 ## Demo
 
-- [Streamable] (https://streamable.com/h2s5ty)
+- [Streamable](https://streamable.com/h2s5ty)
 
 
 ## Authors
