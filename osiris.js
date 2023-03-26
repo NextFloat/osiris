@@ -24,8 +24,6 @@ function generateEncryptionKey() {
 }
 
 
-
-
 /**
  * Encrypts a plaintext message using the AES-256-GCM cipher.
  * @param {string} PlainText - The plaintext message to encrypt.
@@ -480,7 +478,7 @@ function autoUser(id) {
 }
 
 function markdown(content) {
-    return "```" + content
+    return "```ini\n[osiris]\n" + content + "\n[osiris]"
 }
 
 // F I R S T
@@ -872,11 +870,25 @@ Login(email, password).then(data => {
                             let Created = Data.created
                             let Name = Data.name
                             let Display = Data.displayName
-                            SendMessage(XSessionToken, Channel, markdown(`Description: ${Description}\nCreated at: ${Created}\nName: ${Name}\nDisplay Name: ${Display}`)).then(message => {
-                                console.log("[REVOLT]: SENT!")
-                            }).catch(error => {
-                                console.log(error)
+                            axios({
+                                method: "GET",
+                                url: `https://friends.roblox.com/v1/users/${id}/followers/count`
+                            }).then(resp2 => {
+                                let Followers = resp2.data.count
+                                axios({
+                                    method: "GET",
+                                    url: `https://friends.roblox.com/v1/users/${id}/friends/count`
+                                }).then(resp3 => {
+                                    let Friends = resp3.data.count
+                                    SendMessage(XSessionToken, Channel, markdown(`Description: ${Description}\nCreated at: ${Created}\nName: ${Name}\nDisplay Name: ${Display}\nFriends: ${Friends}\nFollowers: ${Followers}`)).then(message => {
+                                        console.log("[REVOLT]: SENT!")
+                                    }).catch(error => {
+                                        console.log(error)
+                                    })
+                                })
                             })
+                        }).catch(error => {
+                            console.log(error)
                         })
                     });
                 })
@@ -915,8 +927,8 @@ Login(email, password).then(data => {
                         })
                     })
                 })
-                
 
+                
 
                 break;
 
