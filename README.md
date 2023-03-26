@@ -5,9 +5,8 @@ Osiris was made to enhance the user experience on revolt.chat!
 
 ## Features
 
-- Feature 1 
-- Feature 2
-- wow, a 3rd feature!
+- Message Encryption!
+- Commands!
 
 ## Demo
 
