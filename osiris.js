@@ -1,13 +1,9 @@
 const WebSocket = require('ws');
 const axios = require("axios")
 const ulid = require('ulid');
-const { channel } = require('diagnostics_channel');
-const { faker } = require('@faker-js/faker') //-- dont remove (for fake commands in osiris)
-const figlet = require('figlet')
+const crypto = require('crypto');
 const commands = {};
-const { email, password, prefix } = require('./config.json')
-console.clear()
-
+const prefix = ">"
 /**
  * Command handler function.
  * @param {string} Command - The command to handle.
@@ -17,6 +13,55 @@ console.clear()
 function addCommand(command, callback) {
     commands[command] = callback;
 }
+
+/**
+ * Generates a random AES-256-GCM encryption key.
+ *
+ * @returns {string} The randomly generated encryption key.
+ */
+function generateEncryptionKey() {
+    return crypto.randomBytes(32)
+}
+
+
+
+
+/**
+ * Encrypts a plaintext message using the AES-256-GCM cipher.
+ * @param {string} PlainText - The plaintext message to encrypt.
+ * @param {Buffer} Key - The secret key to use for encryption.
+ * @returns {string} The encrypted ciphertext, formatted as a string in the format "{iv}:{ciphertext}:{tag}".
+ */
+function encrypt(plaintext, key) {
+    const iv = crypto.randomBytes(12); // Generate a random initialization vector
+    const cipher = crypto.createCipheriv('aes-256-gcm', key, iv); // Create a cipher using the secret key and initialization vector
+    let encrypted = cipher.update(plaintext, 'utf8', 'hex'); // Encrypt the plaintext
+    encrypted += cipher.final('hex');
+    const tag = cipher.getAuthTag(); // Get the authentication tag
+    return `${iv.toString('hex')}:${encrypted}:${tag.toString('hex')}`; // Return the initialization vector, encrypted plaintext, and authentication tag concatenated with a separator
+}
+
+/**
+ * Decrypts a ciphertext message encrypted using the AES-256-GCM cipher.
+ * @param {string} CipherText - The ciphertext message to decrypt, formatted as a string in the format "{iv}:{ciphertext}:{tag}".
+ * @param {Buffer} Key - The secret key used to encrypt the plaintext message.
+ * @returns {string} The decrypted plaintext message.
+ * @throws {Error} Throws an error if the ciphertext is improperly formatted or cannot be decrypted.
+ */
+function decrypt(ciphertext, key) {
+    const parts = ciphertext.split(':'); // Split the ciphertext into its constituent parts
+    const iv = Buffer.from(parts[0], 'hex');
+    const encrypted = Buffer.from(parts[1], 'hex');
+    const tag = Buffer.from(parts[2], 'hex');
+    const decipher = crypto.createDecipheriv('aes-256-gcm', key, iv); // Create a decipher using the secret key and initialization vector
+    decipher.setAuthTag(tag); // Set the authentication tag
+    let plaintext = decipher.update(encrypted, 'hex', 'utf8'); // Decrypt the ciphertext
+    plaintext += decipher.final('utf8');
+    return plaintext;
+}
+
+
+
 
 /**
  * Handle a command from a user.
@@ -48,19 +93,11 @@ function Login(Email, Password) {
         axios({
             method: "POST",
             url: `https://api.revolt.chat/auth/session/login`,
-            data: JSON.stringify({
-                "email": Email,
-                "password": Password,
-                "friendly_name": "chrome on Windows 10"
-            }),
+            data: { "email": Email, "password": Password, "friendly_name": "chrome on Windows 10" },
             headers: {
                 Host: 'api.revolt.chat',
                 Connection: 'keep-alive',
-                'Content-Length': JSON.stringify({
-                    "email": Email,
-                    "password": Password,
-                    "friendly_name": "chrome on Windows 10"
-                }).length,
+                'Content-Length': { "email": Email, "password": Password, "friendly_name": "chrome on Windows 10" }.length,
                 'sec-ch-ua': '"Google Chrome";v="111", "Not(A:Brand";v="8", "Chromium";v="111"',
                 Accept: 'application/json, text/plain, */*',
                 'Content-Type': 'application/json',
@@ -170,17 +207,11 @@ function SendMessage(SessionToken, ChannelId, Message){
         axios({
             method: "POST",
             url: `https://api.revolt.chat/channels/${ChannelId}/messages`,
-            data: JSON.stringify({
-                "content":Message,
-                "replies":[]
-            }),
+            data: { "content":Message, "replies":[] },
             headers: {
                 Host: 'api.revolt.chat',
                 Connection: 'keep-alive',
-                'Content-Length': JSON.stringify({
-                    "content": Message,
-                    "replies":[]
-                }).length,
+                'Content-Length': { "content": Message, "replies":[] }.length,
                 Accept: 'application/json, text/plain, */*',
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36',
                 'Idempotency-Key': ulid.ulid(),
@@ -199,7 +230,8 @@ function SendMessage(SessionToken, ChannelId, Message){
                 Nonce: response.data.nonce,
                 ChannelId: response.data.channel,
                 Author: response.data.author,
-                Content: response.data.content
+                Content: response.data.content,
+                MessageId: response.data._id
             })
         }).catch(response => {
             return reject(JSON.stringify(response.response.data))
@@ -235,10 +267,19 @@ function FetchChannel(SessionToken, ChannelId){
            Origin: "https://app.revolt.chat",
            Referer: "https://app.revolt.chat/"
        }).then(response => {
-         return resolve({
-            ChannelType : response.data.channel_type,
-            ChannelId: response.data._id
-         })
+        if (response.data?.server){
+            return resolve({
+                ChannelType : response.data.channel_type,
+                ChannelId: response.data._id,
+                ServerId: response.data.server
+            })
+        } else {
+            return resolve({
+                ChannelType : response.data.channel_type,
+                ChannelId: response.data._id
+             })
+        }
+         
        }).catch(response => {
            return reject(JSON.stringify(response.response.data))
        })
@@ -300,6 +341,134 @@ function FetchUser(SessionToken, UserId){
    })
 }
 
+/**
+ * This function bans a user from a server with a reason.
+ * @param {string} SessionToken - The session token retrieved from the Login() function.
+ * @param {string} Server - The server to ban the user from.
+ * @param {string} UserId - The person to ban.
+ * @param {string} Reason - The reason for the ban.
+ * @returns {Object} ban information.
+ */
+function BanUser(SessionToken, Server, UserId, Reason){
+    return new Promise((resolve, reject) => {
+       axios({
+           method: "PUT",
+           url: `https://api.revolt.chat/servers/${Server}/bans/${UserId}`,
+           data : {"reason": Reason},
+           headers: {
+               Host: 'api.revolt.chat',
+               Connection: 'keep-alive',
+               'Content-Length': {"reason": Reason}.length,
+               Accept: 'application/json, text/plain, */*',
+               'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36',
+               'Idempotency-Key': ulid.ulid(),
+               'X-Session-Token': SessionToken,
+               'Content-Type': 'application/json',
+               'Sec-Fetch-Site': 'same-site',
+               'Sec-Fetch-Mode': 'cors',
+               'Sec-Fetch-Dest': 'empty',
+               'Accept-Encoding': 'gzip, deflate, br',
+               'Accept-Language': 'en-US'  
+           },
+           Origin: "https://app.revolt.chat",
+           Referer: "https://app.revolt.chat/"
+       }).then(response => {
+        //{"_id":{"server":"01GWEEVSCFTV7NRYGA4TJ6FJYC","user":"01GW06GTERQR4QSGW5S3EW4SQ1"},"reason":"reaso"}
+        return resolve({
+            Server: response.data._id.server,
+            UserName: response.data._id.user,
+            Reason: response.data._id.reason
+        })
+       }).catch(response => {
+        console.log(response)
+           return reject(JSON.stringify(response.response.data))
+       })
+   })
+}
+
+/**
+ * This function unbans a user from a server.
+ * @param {string} SessionToken - The session token retrieved from the Login() function.
+ * @param {string} Server - The server to unban the user from.
+ * @param {string} UserId - The person to unban.
+ */
+function UnBanUser(SessionToken, Server, UserId){
+    return new Promise((resolve, reject) => {
+       axios({
+           method: "DELETE",
+           url: `https://api.revolt.chat/servers/${Server}/bans/${UserId}`,
+           headers: {
+               Host: 'api.revolt.chat',
+               Connection: 'keep-alive',
+               Accept: 'application/json, text/plain, */*',
+               'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36',
+               'Idempotency-Key': ulid.ulid(),
+               'X-Session-Token': SessionToken,
+               'Content-Type': 'application/json',
+               'Sec-Fetch-Site': 'same-site',
+               'Sec-Fetch-Mode': 'cors',
+               'Sec-Fetch-Dest': 'empty',
+               'Accept-Encoding': 'gzip, deflate, br',
+               'Accept-Language': 'en-US'  
+           },
+           Origin: "https://app.revolt.chat",
+           Referer: "https://app.revolt.chat/"
+       }).then(response => {
+        if (response.data?.type == "NotFound"){
+            return reject("Ban/User not found")
+        } else {
+            return resolve({
+                Server: response.data._id.server,
+                UserName: response.data._id.user,
+                Reason: response.data._id.reason
+            })
+        }
+       }).catch(response => {
+        console.log(response)
+           return reject(JSON.stringify(response.response.data))
+       })
+   })
+}
+
+
+/**
+ * This function deletes a message sent from someone.
+ * @param {string} SessionToken - The session token retrieved from the Login() function.
+ * @param {string} Channel - The channel the message has been sent into.
+ * @param {string} MessageId - The message identifier.
+ */
+function DeleteMessage(SessionToken, Channel, MessageId){
+    return new Promise((resolve, reject) => {
+       axios({
+           method: "DELETE",
+           url: `https://api.revolt.chat/channels/${Channel}/messages/${MessageId} `,
+           headers: {
+               Host: 'api.revolt.chat',
+               Connection: 'keep-alive',
+               Accept: 'application/json, text/plain, */*',
+               'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36',
+               'Idempotency-Key': ulid.ulid(),
+               'X-Session-Token': SessionToken,
+               'Content-Type': 'application/json',
+               'Sec-Fetch-Site': 'same-site',
+               'Sec-Fetch-Mode': 'cors',
+               'Sec-Fetch-Dest': 'empty',
+               'Accept-Encoding': 'gzip, deflate, br',
+               'Accept-Language': 'en-US'  
+           },
+           Origin: "https://app.revolt.chat",
+           Referer: "https://app.revolt.chat/"
+       }).then(response => {
+            return resolve({
+                Status: "Deleted"
+            })
+       }).catch(response => {
+        console.log(response)
+           return reject(JSON.stringify(response.response.data))
+       })
+   })
+}
+
 
 function getArgs(content) {
     return content.slice(prefix.length).trim().split(/ +/)
@@ -309,13 +478,9 @@ function autoUser(id) {
     return `<@${id}>`
 }
 
-function markdown(content) {
-    return "```ini\n[osiris]\n" + content
-}
-
 // F I R S T
 
-Login(email, password).then(data => {
+Login("", "").then(data => {
     console.log("[REVOLT]: Fetched login info, punchin' it in!")
     let Id = data._Id
     let UserId = data.User_Id
@@ -393,7 +558,7 @@ Login(email, password).then(data => {
                 let ClientTelle = Message.users.find(u => u._id === UserId)
                 if (ClientTelle) {
                     Client = ClientTelle
-                    console.log("[REVOLT]: Fetched client.")
+                    console.log(`[REVOLT]: Fetched client. (Id = ${ClientTelle._id}) (Username = ${ClientTelle.username})`)
                 }
             
                 for (const member of Message.members) {
@@ -413,8 +578,56 @@ Login(email, password).then(data => {
                     }))
                 }, 10000);
 
-
                 //ADD CMDS
+
+                addCommand('encrypt', (data, sharedObj) => {
+                    return new Promise((resolve, reject) => {
+                        const Content = data.Content
+                        const Channel = data.ChannelId
+                        const MessageId = data.MessageId
+                        var Args = getArgs(Content)
+                        var Message = Args.slice(1).join(" ")
+                        if (!Message){
+                            return SendMessage(XSessionToken, Channel, `[REVOLT]: Invalid message or no message provided. Options are: `)
+                        }
+                        var EncryptionKey = generateEncryptionKey()
+                        var EncryptedMessage = encrypt(Message, EncryptionKey)
+                        DeleteMessage(XSessionToken, Channel, MessageId)
+                        console.log(`[REVOLT]: Your decryption or encryption key is ${EncryptionKey.toString('hex')}`)
+                        SendMessage(XSessionToken, Channel, `[REVOLT]:\n>Encrypted Message: ${EncryptedMessage}\n>Decryption Key: In your console.`).then(message => {
+                            console.log("[REVOLT]: SENT!")
+                        })
+                    });
+                })
+
+
+                addCommand('decrypt', (data, sharedObj) => {
+                    return new Promise((resolve, reject) => {
+                        const Content = data.Content
+                        const Channel = data.ChannelId
+                        const MessageId = data.MessageId
+                        var Args = getArgs(Content)
+                        var Message = Args[1]
+                        var Key = Args.slice(2).join(" ")
+                        if (!Message){
+                            return SendMessage(XSessionToken, Channel, `[REVOLT]: Invalid message or no message provided. Options are: `)
+                        }
+                        if (!Key){
+                            return SendMessage(XSessionToken, Channel, `[REVOLT]: Invalid key or no key provided. Options are: buffer of 32 bytes`)
+                        }
+                        var decrypted
+                        try {
+                            decrypted = decrypt(Message, Buffer.from(Key, "hex"))
+                        } catch(e){
+                            return SendMessage(XSessionToken, Channel, `[REVOLT]: An error occured while decrypting: ${e.code}`)
+                        }
+                        DeleteMessage(XSessionToken, Channel, MessageId)
+                        SendMessage(XSessionToken, Channel, `[REVOLT]:\n>Encrypted Message: ${Message}\n>Decrypted Message: ${decrypted}`).then(message => {
+                            console.log("[REVOLT]: SENT!")
+                        })
+                    });
+                })
+
                 addCommand('insult', (data, sharedObj) => {
                     return new Promise((resolve, reject) => {
                         const Content = data.Content
@@ -438,6 +651,63 @@ Login(email, password).then(data => {
                     });
                 })
 
+                addCommand('ban', (data, sharedObj) => {
+                    return new Promise((resolve, reject) => {
+                        const Content = data.Content
+                        const Channel = data.ChannelId
+                        const Server = data?.ServerId
+                        const Args = getArgs(Content)
+                        const User = ScanForMentionsAndExtract(Content);
+                        if (!User){
+                           return SendMessage(XSessionToken, Channel, `[REVOLT]: Invalid user or no user provided. Options are: `)
+                        }
+                        if (!Args[2]){
+                            return SendMessage(XSessionToken, Channel, `[REVOLT]: Invalid reason or no reason provided. Options are: `)
+                         }
+                        if (Server){
+                            BanUser(XSessionToken, Server, User, Args.slice(1).join(" ")).then(ban => {
+                                SendMessage(XSessionToken, Channel, `Successfully Banned ${autoUser(User)}(${User}) For "${Args[2]}"`).then(message => {
+                                    console.log("[REVOLT]: SENT!")
+                                }).catch(error => {
+                                    console.log(error)
+                                })
+                            }).catch(ban => {
+                                console.log("[REVOLT]: Couldnt ban.")
+                                console.log(ban)
+                            })
+                        }
+                    })
+                })
+
+
+                addCommand('unban', (data, sharedObj) => {
+                    return new Promise((resolve, reject) => {
+                        const Content = data.Content
+                        const Channel = data.ChannelId
+                        const Server = data?.ServerId
+                        const Args = getArgs(Content)
+                        const User = ScanForMentionsAndExtract(Content);
+                        if (!User){
+                           return SendMessage(XSessionToken, Channel, `[REVOLT]: Invalid user or no user provided. Options are: `)
+                        }
+                        if (Server){
+                            UnBanUser(XSessionToken, Server, User).then(ban => {
+                                SendMessage(XSessionToken, Channel, `Successfully UnBanned ${autoUser(User)}(${User}) For "${Args[2]}"`).then(message => {
+                                    console.log("[REVOLT]: SENT!")
+                                }).catch(error => {
+                                    console.log(error)
+                                })
+                            }).catch(ban => {
+                                console.log(ban)
+                                console.log("[REVOLT]: Couldnt unban.")
+                                SendMessage(XSessionToken, Channel, `[REVOLT]: Couldnt ban.\n>${ban}`)
+                            })
+                        }
+                    })
+                })
+                //assuming to be a server command
+            
+
                 addCommand('argstest', (data, sharedObj) => {
                     return new Promise((resolve, reject) => {
                         const Content = data.Content
@@ -456,18 +726,6 @@ Login(email, password).then(data => {
                         const User = ScanForMentionsAndExtract(Content)
                         const Gayrate = Math.floor(Math.random() * 101) // should work
                         SendMessage(XSessionToken, Channel, `${autoUser(User)} is ${Gayrate}% gay!`).then(message => {
-                            console.log("[REVOLT]: SENT!")
-                        })
-                    })
-                })
-
-                addCommand('retardrate', (data, sharedObj) => {
-                    return new Promise((resolve, reject) => {
-                        const Content = data.Content
-                        const Channel = data.ChannelId
-                        const User = ScanForMentionsAndExtract(Content)
-                        const Retardrate = Math.floor(Math.random() * 101)
-                        SendMessage(XSessionToken, Channel, `${autoUser(User)} is ${Retardrate}% retarded!`).then(message => {
                             console.log("[REVOLT]: SENT!")
                         })
                     })
@@ -513,212 +771,7 @@ Login(email, password).then(data => {
                         })
                     });
                 })
-
-                addCommand('fake', (data, sharedObj) => {
-                    return new Promise((resolve, reject) => {
-                        const Content = data.Content
-                        const Channel = data.ChannelId
-                        const Args = getArgs(Content)
-                        const Mode = Args[1]
-                        switch (Mode) {
-                            case "address":
-                                SendMessage(XSessionToken, Channel, `${faker.address.streetAddress()}`).then(message => {
-                                    console.log("[REVOLT]: SENT!")
-                                })
-                                break;
-                            case "name":
-                                SendMessage(XSessionToken, Channel, `${faker.name.fullName()}`).then(message => {
-                                    console.log("[REVOLT]: SENT!")
-                                })
-                            default:
-                                console.log("[REVOLT] INVALID")
-                                break;
-                        }
-                    })
-                })
-
-                addCommand('spam', (data, sharedObj) => { //-- not meant for use, very high chance of getting ratelimited
-                    return new Promise((resolve, reject) => {
-                        const Content = data.Content
-                        const Channel = data.ChannelId
-                        const Args = getArgs(Content)
-                        const TimesToSpam = Args[1]
-                        const Text = Args.slice(2).join(" ")
-                        for (let i = 0; i < TimesToSpam; i++) {
-                            SendMessage(XSessionToken, Channel, `${Text}`).then(message => {
-                                console.log("[REVOLT]: SENT! [SPAMMED]")
-                            })
-                        }
-                    });
-                })
-
-                addCommand('ascii', (data, sharedObj) => { //-- not meant for use, very high chance of getting ratelimited
-                    return new Promise((resolve, reject) => {
-                        const Content = data.Content
-                        const Channel = data.ChannelId
-                        const Args = getArgs(Content)
-                        const Text = Args.slice(1).join(" ")
-                        figlet.text(Text, function (err, data) {
-                            if (!err) {
-                                SendMessage(XSessionToken, Channel, "```\n" + data).then(message => {
-                                    console.log("[REVOLT]: SENT! [ASCII]")
-                                })
-                            }
-                        })
-                    });
-                })
                 
-                addCommand('ping', (data, sharedObj) => {
-                    return new Promise((resolve, reject) => {
-                        const Content = data.Content
-                        const Channel = data.ChannelId
-                        SendMessage(XSessionToken, Channel, "Pong!").then(message => {
-                            console.log("[REVOLT]: SENT!")
-                        }).catch(error => {
-                            console.log(error)
-                        })
-                    });
-                })
-                
-                addCommand('cock', (data, sharedObj) => {
-                    return new Promise((resolve, reject) => {
-                        const Content = data.Content
-                        const Channel = data.ChannelId
-                        const CockSizes = ['8=D', '8==D', '8===D', '8====D', '8=====D', '8======D', '8=======D', '8========D']
-                        const User = autoUser(ScanForMentionsAndExtract(Content))
-                        SendMessage(XSessionToken, Channel, `${User}'s cock is this large: ${CockSizes[Math.floor(Math.random() * CockSizes.length)]}`).then(message => {
-                            console.log("[REVOLT]: SENT!")
-                        }).catch(error => {
-                            console.log(error)
-                        })
-                    });
-                })
-
-                addCommand('bird', (data, sharedObj) => {
-                    return new Promise((resolve, reject) => {
-                        const Content = data.Content
-                        const Channel = data.ChannelId
-                        axios({
-                            method: "GET",
-                            url: "https://some-random-api.ml/animal/bird"
-                        }).then(response => {
-                            SendMessage(XSessionToken, Channel, `${response.data.image}`).then(message => {
-                                console.log("[REVOLT]: SENT!")
-                            }).catch(error => {
-                                console.log(error)
-                            })
-                        })
-                    });
-                })
-
-                addCommand('kanye', (data, sharedObj) => {
-                    return new Promise((resolve, reject) => {
-                        const Content = data.Content
-                        const Channel = data.ChannelId
-                        axios({
-                            method: "GET",
-                            url: "https://api.kanye.rest/"
-                        }).then(response => {
-                            SendMessage(XSessionToken, Channel, `${response.data.quote}`).then(message => {
-                                console.log("[REVOLT]: SENT!")
-                            }).catch(error => {
-                                console.log(error)
-                            })
-                        })
-                    });
-                })
-
-                addCommand('chucknorris', (data, sharedObj) => {
-                    return new Promise((resolve, reject) => {
-                        const Content = data.Content
-                        const Channel = data.ChannelId
-                        axios({
-                            method: "GET",
-                            url: "https://api.chucknorris.io/jokes/random"
-                        }).then(response => {
-                            SendMessage(XSessionToken, Channel, `${response.data.value}`).then(message => {
-                                console.log("[REVOLT]: SENT!")
-                            }).catch(error => {
-                                console.log(error)
-                            })
-                        })
-                    });
-                })
-
-                addCommand('dog', (data, sharedObj) => {
-                    return new Promise((resolve, reject) => {
-                        const Content = data.Content
-                        const Channel = data.ChannelId
-                        axios({
-                            method: "GET",
-                            url: "https://dog.ceo/api/breeds/image/random"
-                        }).then(response => {
-                            SendMessage(XSessionToken, Channel, `${response.data.message}`).then(message => {
-                                console.log("[REVOLT]: SENT!")
-                            }).catch(error => {
-                                console.log(error)
-                            })
-                        })
-                    });
-                })
-
-                addCommand('robloxinfo', (data, sharedObj) => {
-                    return new Promise((resolve, reject) => {
-                        const Content = data.Content
-                        const Channel = data.ChannelId
-                        const id = getArgs(Content)[1]
-                        axios({
-                            method: "GET",
-                            url: `https://users.roblox.com/v1/users/${id}`
-                        }).then(response => {
-                            let Data = response.data
-                            let Description = Data.description
-                            let Created = Data.created
-                            let Name = Data.name
-                            let Display = Data.displayName
-                            SendMessage(XSessionToken, Channel, markdown(`Description: ${Description}\nCreated at: ${Created}\nName: ${Name}\nDisplay Name: ${Display}`)).then(message => {
-                                console.log("[REVOLT]: SENT!")
-                            }).catch(error => {
-                                console.log(error)
-                            })
-                        })
-                    });
-                })
-
-                addCommand('iq', (data, sharedObj) => {
-                    return new Promise((resolve, reject) => {
-                        const Content = data.Content
-                        const Channel = data.ChannelId
-                        const User = autoUser(ScanForMentionsAndExtract(Content))
-                        const IQ = Math.floor(Math.random() * 201)
-                        SendMessage(XSessionToken, Channel, `${User} has an iq of ${IQ}!`).then(message => {
-                            console.log("[REVOLT]: SENT!")
-                        })
-                    });
-                })
-
-                addCommand('invismsg', (data, sharedObj) => {
-                    return new Promise((resolve, reject) => {
-                        const Channel = data.ChannelId
-                        SendMessage(XSessionToken, Channel, `[ ]( )`).then(message => {
-                            console.log("[REVOLT]: SENT!")
-                        })
-                    })
-                })
-
-                addCommand('wyr', (data, sharedObj) => {
-                    return new Promise((resolve, reject) => {
-                        const Channel = data.ChannelId
-                        axios({
-                            method: 'GET',
-                            url: 'https://would-you-rather-api.abaanshanid.repl.co/'
-                        }).then(response => {
-                            SendMessage(XSessionToken, Channel, `${response.data.data}`).then(message => {
-                                console.log("[REVOLT]: SENT!")
-                            })
-                        })
-                    })
-                })
 
                 break;
 
@@ -733,24 +786,62 @@ Login(email, password).then(data => {
                     FetchUser(XSessionToken, Message.author).then(user => {
                         Users[Message.author] = {Username: user.UserName}
                         console.log(`[REVOLT]: Author ${Users[Message.author] ? Users[Message.author].Username : "UNKNOWN?"} (${Message.author}) sent ${Message.content}`)
+                        FetchChannel(XSessionToken, Message.channel).then(channel => {
+                            if (channel.ServerId){
+                                if (Message.content?.startsWith(prefix)){
+                                    handleCommand(Message.content, {
+                                        Context: "Server",
+                                        Author: Message.author,
+                                        ChannelId: Message.channel,
+                                        Content : Message.content,
+                                        ServerId : channel.ServerId,
+                                        MessageId: Message._id
+                                    })
+                                }
+                            } else {
+                                if (Message.content?.startsWith(prefix)){
+                                    handleCommand(Message.content, {
+                                        Context: "Message",
+                                        Author: Message.author,
+                                        ChannelId: Message.channel,
+                                        Content : Message.content,
+                                        MessageId: Message._id
+                                    })
+                                }
+                            }
+                        })
                     })
                 } else {
-                    console.log(`[REVOLT]: Author ${Users[Message.author] ? Users[Message.author].Username : "UNKNOWN?"} (${Message.author}) sent ${Message.content}`)
-                }
-                if (Message.content?.startsWith(prefix)){
-                    handleCommand(Message.content, {
-                        Author: Message.author,
-                        ChannelId: Message.channel,
-                        Content : Message.content
+                    FetchChannel(XSessionToken, Message.channel).then(channel => {
+                        if (channel.ServerId){
+                            if (Message.content?.startsWith(prefix)){
+                                handleCommand(Message.content, {
+                                    Context: "Server",
+                                    Author: Message.author,
+                                    ChannelId: Message.channel,
+                                    Content : Message.content,
+                                    ServerId : channel.ServerId,
+                                    MessageId: Message._id
+                                })
+                            }
+                        } else {
+                            if (Message.content?.startsWith(prefix)){
+                                handleCommand(Message.content, {
+                                    Context: "Message",
+                                    Author: Message.author,
+                                    ChannelId: Message.channel,
+                                    Content : Message.content,
+                                    MessageId: Message._id
+                                })
+                            }
+                        }
                     })
+                    console.log(`[REVOLT]: Author ${Users[Message.author] ? Users[Message.author].Username : "UNKNOWN?"} (${Message.author}) sent ${Message.content}`)
+                  
                 }
+              
                 
-                 /*FetchChannel(XSessionToken, Message.channel).then(channel => {
-                    console.log(channel)
-
-                    if (channel.ChannelType == ("TextChannel")){
-                    }
-                })*/
+    
                 break
 
             case "Pong":
@@ -767,6 +858,6 @@ Login(email, password).then(data => {
         }
     })
 }).catch(oopsies => {
-    console.error(oopsies.response)
+    console.error(oopsies)
     throw new Error(`[REVOLT]: Couldnt login. Additional information`)
 }) //First start off by logging in your acc with email and password. Captchas should be absent.
