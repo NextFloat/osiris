@@ -386,6 +386,7 @@ function BanUser(SessionToken, Server, UserId, Reason){
    })
 }
 
+
 /**
  * This function unbans a user from a server.
  * @param {string} SessionToken - The session token retrieved from the Login() function.
@@ -476,6 +477,10 @@ function getArgs(content) {
 
 function autoUser(id) {
     return `<@${id}>`
+}
+
+function markdown(content) {
+    return "```" + content
 }
 
 // F I R S T
@@ -911,6 +916,8 @@ Login(email, password).then(data => {
                     })
                 })
                 
+
+
                 break;
 
             case "ChannelStartTyping":
