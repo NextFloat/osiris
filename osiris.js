@@ -4,6 +4,8 @@ const ulid = require('ulid');
 const crypto = require('crypto');
 const commands = {};
 const { email, password, prefix } = require("./config.json")
+const { faker } = require('@faker-js/faker')
+const figlet = require('figlet')
 /**
  * Command handler function.
  * @param {string} Command - The command to handle.
@@ -583,6 +585,14 @@ Login(email, password).then(data => {
 
                 //ADD CMDS
 
+                // NEVER FORGET TO UPDATE THIS!
+                addCommand('help', (data, sharedObj) => {
+                    const Channel = data.ChannelId
+                    SendMessage(XSessionToken, Channel, `${markdown("encrypt <message>\ndecrypt <message> <key>\ninsult\nlenny\nban @user\nunban @user\ngayrate @user\n8ball <question>\ntext <color> <type> <message>\ncock @user\nbird\nkanye\nchucknorris\ndog\nrobloxinfo <id>\niq @user\ninvismsg\nwyr\nascii <message>\naddy\nhackerphase\nidentity\nslap @user\nhug @user\nkiss @user\ncoinflip")}`).then(message => {
+                        console.log("[REVOLT]: SENT!")
+                    })
+                })
+
                 addCommand('encrypt', (data, sharedObj) => {
                     return new Promise((resolve, reject) => {
                         const Content = data.Content
@@ -928,7 +938,113 @@ Login(email, password).then(data => {
                     })
                 })
 
-                
+                addCommand('ascii', (data, sharedObj) => {
+                    const Channel = data.ChannelId
+                    const Content = data.Content
+                    const Arguments = getArgs(Content)
+                    const Text = Arguments.slice(1).join(" ")
+                    figlet.text(Content, function(err, data) {
+                        if (err) {
+                            console.log(`[FIGLET]: ${err}`)
+                        }
+                        SendMessage(XSessionToken, Channel, `${markdown(data)}`).then(message => {
+                            console.log("[REVOLT]: SENT!")
+                        })
+                    })
+                })
+
+                addCommand('addy', (data, sharedObj) => {
+                    const Channel = data.ChannelId
+                    SendMessage(XSessionToken, Channel, `${faker.address.streetAddress()}`).then(message => {
+                        console.log("[REVOLT]: SENT!")
+                    })
+                })
+
+                addCommand('hackerphase', (data, sharedObj) => {
+                    const Channel = data.ChannelId
+                    SendMessage(XSessionToken, Channel, `${faker.hacker.phrase()}`).then(message => {
+                        console.log("[REVOLT]: SENT!")
+                    })
+                })
+
+                addCommand('email', (data, sharedObj) => {
+                    const Channel = data.ChannelId
+                    SendMessage(XSessionToken, Channel, `${faker.internet.email()}`).then(message => {
+                        console.log("[REVOLT]: SENT!")
+                    })
+                })
+
+                addCommand('identity', (data, sharedObj) => {
+                    const Channel = data.ChannelId
+                    const Email = faker.internet.email()
+                    const Name = faker.name.fullName()
+                    const Address = faker.address.streetAddress()
+                    SendMessage(XSessionToken, Channel, `${markdown(`Name: ${Name}\nEmail: ${Email}\nAddress: ${Address}`)}`).then(message => {
+                        console.log("[REVOLT]: SENT!")
+                    })
+                })
+
+                addCommand('slap', (data, sharedObj) => {
+                    return new Promise((resolve, reject) => {
+                        const Content = data.Content
+                        const Channel = data.ChannelId
+                        const User = autoUser(ScanForMentionsAndExtract(Content))
+                        axios({
+                            method: "GET",
+                            url: "https://nekos.life/api/v2/img/slap"
+                        }).then(response => {
+                            SendMessage(XSessionToken, Channel, `${response.data.url}\n${User}`).then(message => {
+                                console.log("[REVOLT]: SENT!")
+                            }).catch(error => {
+                                console.log(error)
+                            })
+                        })
+                    });
+                })
+
+                addCommand('hug', (data, sharedObj) => {
+                    return new Promise((resolve, reject) => {
+                        const Content = data.Content
+                        const Channel = data.ChannelId
+                        const User = autoUser(ScanForMentionsAndExtract(Content))
+                        axios({
+                            method: "GET",
+                            url: "https://nekos.life/api/v2/img/hug"
+                        }).then(response => {
+                            SendMessage(XSessionToken, Channel, `${response.data.url}\n${User}`).then(message => {
+                                console.log("[REVOLT]: SENT!")
+                            }).catch(error => {
+                                console.log(error)
+                            })
+                        })
+                    });
+                })
+
+                addCommand('kiss', (data, sharedObj) => {
+                    return new Promise((resolve, reject) => {
+                        const Content = data.Content
+                        const Channel = data.ChannelId
+                        const User = autoUser(ScanForMentionsAndExtract(Content))
+                        axios({
+                            method: "GET",
+                            url: "https://nekos.life/api/v2/img/kiss"
+                        }).then(response => {
+                            SendMessage(XSessionToken, Channel, `${response.data.url}\n${User}`).then(message => {
+                                console.log("[REVOLT]: SENT!")
+                            }).catch(error => {
+                                console.log(error)
+                            })
+                        })
+                    });
+                })
+
+                addCommand('coinflip', (data, sharedObj) => {
+                    const Channel = data.ChannelId
+                    const CF = ["Heads", "Tails"]
+                    SendMessage(XSessionToken, Channel, `${CF[Math.floor(Math.random() * CF.length)]}`).then(message => {
+                        console.log("[REVOLT]: SENT!")
+                    })
+                })
 
                 break;
 
