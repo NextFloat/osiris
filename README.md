@@ -10,7 +10,7 @@ Osiris was made to enhance the user experience on revolt.chat!
 
 ## Demo
 
-{Gif / Link to demo media}
+<div style="width:100%;height:0px;position:relative;padding-bottom:56.250%;"><iframe src="https://streamable.com/e/h2s5ty" frameborder="0" width="100%" height="100%" allowfullscreen style="width:100%;height:100%;position:absolute;left:0px;top:0px;overflow:hidden;"></iframe></div>
 
 
 ## Authors
