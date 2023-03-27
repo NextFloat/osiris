@@ -1008,7 +1008,7 @@ Login(email, password).then(data => {
 
                 addCommand('phone', (data, sharedObj) => {
                     const Channel = data.ChannelId
-                    SendMessage(XSessionToken, Channel, `${faker.phone.number('501-###-###')}`).then(message => {
+                    SendMessage(XSessionToken, Channel, `${faker.phone.number('501-###-####')}`).then(message => {
                         console.log("[REVOLT]: SENT!")
                     })
                 })
@@ -1020,7 +1020,7 @@ Login(email, password).then(data => {
                     const Email = faker.internet.email()
                     const Name = faker.name.fullName()
                     const Address = faker.address.streetAddress()
-                    const Phone = faker.phone.number('501-###-###')
+                    const Phone = faker.phone.number('501-###-####')
                     if (Args == "face") {
                         axios({
                             method: "GET",
