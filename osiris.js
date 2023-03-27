@@ -975,7 +975,7 @@ Login(email, password).then(data => {
                     const Content = data.Content
                     const Arguments = getArgs(Content)
                     const Text = Arguments.slice(1).join(" ")
-                    figlet.text(Content, function(err, data) {
+                    figlet.text(Text, function(err, data) {
                         if (err) {
                             console.log(`[FIGLET]: ${err}`)
                         }
