@@ -666,7 +666,7 @@ Login(email, password).then(data => {
                     return new Promise((resolve, reject) => {
                         const Content = data.Content
                         const Channel = data.ChannelId
-                        SendMessage(XSessionToken, Channel, "LennyFace").then(message => {
+                        SendMessage(XSessionToken, Channel, "( ͡° ͜ʖ ͡°)").then(message => {
                             console.log("[REVOLT]: SENT!")
                         }).catch(error => {
                             console.log(error)
