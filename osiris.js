@@ -6,6 +6,17 @@ const commands = {};
 const { email, password, prefix } = require("./config.json")
 const { faker } = require('@faker-js/faker')
 const figlet = require('figlet')
+const { platform } = require("node:process")
+const nodeBashTitle = require("node-bash-title") // npm install node-bash-title --save
+
+nodeBashTitle('osiris')
+
+if (platform == 'linux') {
+    console.log('\033[2J') // This clears console
+} else {
+    console.clear()
+}
+
 /**
  * Command handler function.
  * @param {string} Command - The command to handle.
