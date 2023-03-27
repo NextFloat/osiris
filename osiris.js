@@ -25,7 +25,6 @@ function generateEncryptionKey() {
     return crypto.randomBytes(32)
 }
 
-
 /**
  * Encrypts a plaintext message using the AES-256-GCM cipher.
  * @param {string} PlainText - The plaintext message to encrypt.
@@ -588,7 +587,7 @@ Login(email, password).then(data => {
                 // NEVER FORGET TO UPDATE THIS!
                 addCommand('help', (data, sharedObj) => {
                     const Channel = data.ChannelId
-                    SendMessage(XSessionToken, Channel, `${markdown("encrypt <message>\ndecrypt <message> <key>\ninsult\nlenny\nban @user\nunban @user\ngayrate @user\n8ball <question>\ntext <color> <type> <message>\ncock @user\nbird\nkanye\nchucknorris\ndog\ncat\nrobloxinfo <id>\niq @user\ninvismsg\nwyr\nascii <message>\naddy\nhackerphase\nidentity\nslap @user\nhug @user\nkiss @user\ncoinflip\nphone")}`).then(message => {
+                    SendMessage(XSessionToken, Channel, `${markdown("encrypt <message>\ndecrypt <message> <key>\ninsult\nlenny\nban @user\nunban @user\ngayrate @user\n8ball <question>\ntext <color> <type> <message>\ncock @user\nbird\nkanye\nchucknorris\ndog\ncat\nrobloxinfo <id>\niq @user\ninvismsg\nwyr\nascii <message>\naddy\nhackerphase\nidentity <face/nothing>\nslap @user\nhug @user\nkiss @user\ncoinflip\nphone\nface <male/female>\nbreakingbad\ncatfact\nshiba\nfox\nanimequote\nuselessfact")}`).then(message => {
                         console.log("[REVOLT]: SENT!")
                     })
                 })
@@ -1005,10 +1004,22 @@ Login(email, password).then(data => {
 
                 addCommand('identity', (data, sharedObj) => {
                     const Channel = data.ChannelId
+                    const Content = data.Content
+                    const Args = getArgs(Content)[1]
                     const Email = faker.internet.email()
                     const Name = faker.name.fullName()
                     const Address = faker.address.streetAddress()
                     const Phone = faker.phone.number('501-###-###')
+                    if (Args == "face") {
+                        axios({
+                            method: "GET",
+                            url: "https://fakeface.rest/face/json",
+                        }).then(resp => {
+                            SendMessage(XSessionToken, Channel, `${markdown(`Name: ${Name}\nEmail: ${Email}\nAddress: ${Address}\nPhone Number: ${Phone}\nFace Picture: ${resp.data.image_url}`)}`).then(message => {
+                                console.log("[REVOLT]: SENT!")
+                            })
+                        })
+                    }
                     SendMessage(XSessionToken, Channel, `${markdown(`Name: ${Name}\nEmail: ${Email}\nAddress: ${Address}\nPhone Number: ${Phone}`)}`).then(message => {
                         console.log("[REVOLT]: SENT!")
                     })
@@ -1079,6 +1090,114 @@ Login(email, password).then(data => {
                     const CF = ["Heads", "Tails"]
                     SendMessage(XSessionToken, Channel, `${CF[Math.floor(Math.random() * CF.length)]}`).then(message => {
                         console.log("[REVOLT]: SENT!")
+                    })
+                })
+
+                addCommand('face', (data, sharedObj) => {
+                    const Channel = data.ChannelId
+                    const Content = data.Content
+                    const Args = getArgs(Content)[1]
+                    axios({
+                        method: "GET",
+                        url: `https://fakeface.rest/face/json?gender=${Args}`,
+                    }).then(resp => {
+                        SendMessage(XSessionToken, Channel, `${resp.data.image_url}`).then(message => {
+                            console.log("[REVOLT]: SENT!")
+                        })
+                    }).catch(err => {
+                        console.log("[REVOLT]: Face must be male or female")
+                    })
+                })
+
+                addCommand('breakingbad', (data, sharedObj) => {
+                    const Channel = data.ChannelId
+                    axios({
+                        method: "GET",
+                        url: `https://api.breakingbadquotes.xyz/v1/quotes`,
+                    }).then(resp => {
+                        const Data = resp.data[0]
+                        const Quote = Data.quote
+                        const Author = Data.author
+                        SendMessage(XSessionToken, Channel, `${markdown(`Quote: ${Quote}\nAuthor: ${Author}`)}`).then(message => {
+                            console.log("[REVOLT]: SENT!")
+                        })
+                    }).catch(err => {
+                        console.log(err)
+                    })
+                })
+
+                addCommand('catfact', (data, sharedObj) => {
+                    const Channel = data.ChannelId
+                    axios({
+                        method: "GET",
+                        url: `https://meowfacts.herokuapp.com/`,
+                    }).then(resp => {
+                        const Data = resp.data.data[0]
+                        SendMessage(XSessionToken, Channel, `${Data}`).then(message => {
+                            console.log("[REVOLT]: SENT!")
+                        })
+                    }).catch(err => {
+                        console.log(err)
+                    })
+                })
+
+                addCommand('shiba', (data, sharedObj) => {
+                    const Channel = data.ChannelId
+                    axios({
+                        method: "GET",
+                        url: `http://shibe.online/api/shibes?count=1&urls=true&httpsUrls=true`,
+                    }).then(resp => {
+                        const Data = resp.data[0]
+                        SendMessage(XSessionToken, Channel, `${Data}`).then(message => {
+                            console.log("[REVOLT]: SENT!")
+                        })
+                    }).catch(err => {
+                        console.log(err)
+                    })
+                })
+
+                addCommand('fox', (data, sharedObj) => {
+                    const Channel = data.ChannelId
+                    axios({
+                        method: "GET",
+                        url: `https://randomfox.ca/floof/`,
+                    }).then(resp => {
+                        const Data = resp.data.image
+                        SendMessage(XSessionToken, Channel, `${Data}`).then(message => {
+                            console.log("[REVOLT]: SENT!")
+                        })
+                    }).catch(err => {
+                        console.log(err)
+                    })
+                })
+
+                addCommand('animequote', (data, sharedObj) => {
+                    const Channel = data.ChannelId
+                    axios({
+                        method: "GET",
+                        url: `https://animechan.vercel.app/api/random`,
+                    }).then(resp => {
+                        const Data = resp.data.quote
+                        SendMessage(XSessionToken, Channel, `${Data}`).then(message => {
+                            console.log("[REVOLT]: SENT!")
+                        })
+                    }).catch(err => {
+                        console.log(err)
+                    })
+                })
+
+                addCommand('uselessfact', (data, sharedObj) => {
+                    const Channel = data.ChannelId
+                    axios({
+                        method: "GET",
+                        url: `https://uselessfacts.jsph.pl/api/v2/facts/random`,
+                    }).then(resp => {
+                        const Data = resp.data.text
+                        SendMessage(XSessionToken, Channel, `${Data}`).then(message => {
+                            console.log("[REVOLT]: SENT!")
+                        })
+                    }).catch(err => {
+                        console.log(err)
                     })
                 })
 
