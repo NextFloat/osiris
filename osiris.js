@@ -93,7 +93,7 @@ function handleCommand(command, data, sharedObj) {
 
 
 /**
- * This function attempts to get session info aswell as user info with only logging in (REVOLT FUNCTIONALITY).
+ * This function attempts to get session info as well as user info with only logging in (REVOLT FUNCTIONALITY).
  * @param {string} Email - The users email.
  * @param {string} Password - The users password.
  * @returns {Object} The session info and user info.
