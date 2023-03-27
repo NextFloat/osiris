@@ -588,7 +588,7 @@ Login(email, password).then(data => {
                 // NEVER FORGET TO UPDATE THIS!
                 addCommand('help', (data, sharedObj) => {
                     const Channel = data.ChannelId
-                    SendMessage(XSessionToken, Channel, `${markdown("encrypt <message>\ndecrypt <message> <key>\ninsult\nlenny\nban @user\nunban @user\ngayrate @user\n8ball <question>\ntext <color> <type> <message>\ncock @user\nbird\nkanye\nchucknorris\ndog\ncat\nrobloxinfo <id>\niq @user\ninvismsg\nwyr\nascii <message>\naddy\nhackerphase\nidentity\nslap @user\nhug @user\nkiss @user\ncoinflip")}`).then(message => {
+                    SendMessage(XSessionToken, Channel, `${markdown("encrypt <message>\ndecrypt <message> <key>\ninsult\nlenny\nban @user\nunban @user\ngayrate @user\n8ball <question>\ntext <color> <type> <message>\ncock @user\nbird\nkanye\nchucknorris\ndog\ncat\nrobloxinfo <id>\niq @user\ninvismsg\nwyr\nascii <message>\naddy\nhackerphase\nidentity\nslap @user\nhug @user\nkiss @user\ncoinflip\nphone")}`).then(message => {
                         console.log("[REVOLT]: SENT!")
                     })
                 })
@@ -879,6 +879,8 @@ Login(email, password).then(data => {
                             }).catch(error => {
                                 console.log(error)
                             })
+                        }).catch(error => {
+                            console.log("[REVOLT]: COULD NOT COMPLETE REQUEST")
                         })
                     });
                 })
@@ -911,8 +913,10 @@ Login(email, password).then(data => {
                                     SendMessage(XSessionToken, Channel, markdown(`Description: ${Description}\nCreated at: ${Created}\nName: ${Name}\nDisplay Name: ${Display}\nFriends: ${Friends}\nFollowers: ${Followers}`)).then(message => {
                                         console.log("[REVOLT]: SENT!")
                                     }).catch(error => {
-                                        console.log(error)
+                                        console.log("[REVOLT]: COULD NOT COMPLETE REQUEST")
                                     })
+                                }).catch(error => {
+                                    console.log("[REVOLT]: COULD NOT COMPLETE REQUEST")
                                 })
                             })
                         }).catch(error => {
@@ -992,12 +996,20 @@ Login(email, password).then(data => {
                     })
                 })
 
+                addCommand('phone', (data, sharedObj) => {
+                    const Channel = data.ChannelId
+                    SendMessage(XSessionToken, Channel, `${faker.phone.number('501-###-###')}`).then(message => {
+                        console.log("[REVOLT]: SENT!")
+                    })
+                })
+
                 addCommand('identity', (data, sharedObj) => {
                     const Channel = data.ChannelId
                     const Email = faker.internet.email()
                     const Name = faker.name.fullName()
                     const Address = faker.address.streetAddress()
-                    SendMessage(XSessionToken, Channel, `${markdown(`Name: ${Name}\nEmail: ${Email}\nAddress: ${Address}`)}`).then(message => {
+                    const Phone = faker.phone.number('501-###-###')
+                    SendMessage(XSessionToken, Channel, `${markdown(`Name: ${Name}\nEmail: ${Email}\nAddress: ${Address}\nPhone Number: ${Phone}`)}`).then(message => {
                         console.log("[REVOLT]: SENT!")
                     })
                 })
@@ -1016,6 +1028,8 @@ Login(email, password).then(data => {
                             }).catch(error => {
                                 console.log(error)
                             })
+                        }).catch(error => {
+                            console.log("[REVOLT]: COULD NOT COMPLETE REQUEST")
                         })
                     });
                 })
@@ -1034,6 +1048,8 @@ Login(email, password).then(data => {
                             }).catch(error => {
                                 console.log(error)
                             })
+                        }).catch(error => {
+                            console.log("[REVOLT]: COULD NOT COMPLETE REQUEST")
                         })
                     });
                 })
@@ -1052,6 +1068,8 @@ Login(email, password).then(data => {
                             }).catch(error => {
                                 console.log(error)
                             })
+                        }).catch(error => {
+                            console.log("[REVOLT]: COULD NOT COMPLETE REQUEST")
                         })
                     });
                 })
