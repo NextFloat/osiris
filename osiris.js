@@ -588,7 +588,7 @@ Login(email, password).then(data => {
                 // NEVER FORGET TO UPDATE THIS!
                 addCommand('help', (data, sharedObj) => {
                     const Channel = data.ChannelId
-                    SendMessage(XSessionToken, Channel, `${markdown("encrypt <message>\ndecrypt <message> <key>\ninsult\nlenny\nban @user\nunban @user\ngayrate @user\n8ball <question>\ntext <color> <type> <message>\ncock @user\nbird\nkanye\nchucknorris\ndog\nrobloxinfo <id>\niq @user\ninvismsg\nwyr\nascii <message>\naddy\nhackerphase\nidentity\nslap @user\nhug @user\nkiss @user\ncoinflip")}`).then(message => {
+                    SendMessage(XSessionToken, Channel, `${markdown("encrypt <message>\ndecrypt <message> <key>\ninsult\nlenny\nban @user\nunban @user\ngayrate @user\n8ball <question>\ntext <color> <type> <message>\ncock @user\nbird\nkanye\nchucknorris\ndog\ncat\nrobloxinfo <id>\niq @user\ninvismsg\nwyr\nascii <message>\naddy\nhackerphase\nidentity\nslap @user\nhug @user\nkiss @user\ncoinflip")}`).then(message => {
                         console.log("[REVOLT]: SENT!")
                     })
                 })
@@ -866,6 +866,24 @@ Login(email, password).then(data => {
                     });
                 })
                 
+                addCommand('cat', (data, sharedObj) => {
+                    return new Promise((resolve, reject) => {
+                        const Content = data.Content
+                        const Channel = data.ChannelId
+                        axios({
+                            method: "GET",
+                            url: "https://aws.random.cat/meow"
+                        }).then(response => {
+                            SendMessage(XSessionToken, Channel, `${response.data.file}`).then(message => {
+                                console.log("[REVOLT]: SENT!")
+                            }).catch(error => {
+                                console.log(error)
+                            })
+                        })
+                    });
+                })
+                
+            
                 addCommand('robloxinfo', (data, sharedObj) => {
                     return new Promise((resolve, reject) => {
                         const Content = data.Content
