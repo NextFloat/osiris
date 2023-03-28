@@ -12,7 +12,7 @@ const nodeBashTitle = require("node-bash-title") // npm install node-bash-title 
 nodeBashTitle('osiris')
 
 if (platform == 'linux') {
-    console.log('\033[2J') // This clears console
+    console.log('\x1b[2J') // This clears console
 } else {
     console.clear()
 }
@@ -1030,10 +1030,11 @@ Login(email, password).then(data => {
                                 console.log("[REVOLT]: SENT!")
                             })
                         })
+                    } else {
+                        SendMessage(XSessionToken, Channel, `${markdown(`Name: ${Name}\nEmail: ${Email}\nAddress: ${Address}\nPhone Number: ${Phone}`)}`).then(message => {
+                            console.log("[REVOLT]: SENT!")
+                        })
                     }
-                    SendMessage(XSessionToken, Channel, `${markdown(`Name: ${Name}\nEmail: ${Email}\nAddress: ${Address}\nPhone Number: ${Phone}`)}`).then(message => {
-                        console.log("[REVOLT]: SENT!")
-                    })
                 })
 
                 addCommand('slap', (data, sharedObj) => {
