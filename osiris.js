@@ -598,7 +598,7 @@ Login(email, password).then(data => {
                 // NEVER FORGET TO UPDATE THIS!
                 addCommand('help', (data, sharedObj) => {
                     const Channel = data.ChannelId
-                    SendMessage(XSessionToken, Channel, `${markdown("encrypt <message>\ndecrypt <message> <key>\ninsult\nlenny\nban @user\nunban @user\ngayrate @user\n8ball <question>\ntext <color> <type> <message>\ncock @user\nbird\nkanye\nchucknorris\ndog\ncat\nrobloxinfo <id>\niq @user\ninvismsg\nwyr\nascii <message>\naddy\nhackerphase\nidentity <face/nothing>\nslap @user\nhug @user\nkiss @user\ncoinflip\nphone\nface <male/female>\nbreakingbad\ncatfact\nshiba\nfox\nanimequote\nuselessfact")}`).then(message => {
+                    SendMessage(XSessionToken, Channel, `${markdown("encrypt <message>\ndecrypt <message> <key>\ninsult\nlenny\nshrug\nban @user\nunban @user\ngayrate @user\n8ball <question>\ntext <color> <type> <message>\ncock @user\nbird\nkanye\nchucknorris\ndog\ncat\nrobloxinfo <id>\niq @user\ninvismsg\nwyr\nascii <message>\ntrollge\naddy\nhackerphase\nidentity <face/nothing>\nslap @user\nhug @user\nkiss @user\ncoinflip\nphone\nface <male/female>\nbreakingbad\ncatfact\nshiba\nfox\nanimequote\nuselessfact")}`).then(message => {
                         console.log("[REVOLT]: SENT!")
                     })
                 })
@@ -673,6 +673,52 @@ Login(email, password).then(data => {
                         })
                     });
                 })
+
+                addCommand('shrug', (data, sharedObj) => {
+                    return new Promise((resolve, reject) => {
+                        const Content = data.Content
+                        const Channel = data.ChannelId
+                        const message =
+                `¯I_(ツ)_/¯`;
+                        SendMessage(XSessionToken, Channel, message).then(message => {
+                            console.log("[REVOLT]: SENT!")
+                        }).catch(error => {
+                            console.log(error)
+                        })
+                    });
+                })
+                
+                
+
+                addCommand('trollge', (data, sharedObj) => {
+                    return new Promise((resolve, reject) => {
+                        const Content = data.Content
+                        const Channel = data.ChannelId
+                        const message =
+                `░░░░░▄▄▄▄▀▀▀▀▀▀▀▀▄▄▄▄▄▄░░░░░░░
+                ░░░░░█░░░░▒▒▒▒▒▒▒▒▒▒▒▒░░▀▀▄░░░░
+                ░░░░█░░░▒▒▒▒▒▒░░░░░░░░▒▒▒░░█░░░
+                ░░░█░░░░░░▄██▀▄▄░░░░░▄▄▄░░░░█░░
+                ░▄▀▒▄▄▄▒░█▀▀▀▀▄▄█░░░██▄▄█░░░░█░
+                █░▒█▒▄░▀▄▄▄▀░░░░░░░░█░░░▒▒▒▒▒░█
+                █░▒█░█▀▄▄░░░░░█▀░░░░▀▄░░▄▀▀▀▄▒█
+                ░█░▀▄░█▄░█▀▄▄░▀░▀▀░▄▄▀░░░░█░░█░
+                ░░█░░░▀▄▀█▄▄░█▀▀▀▄▄▄▄▀▀█▀██░█░░
+                ░░░█░░░░██░░▀█▄▄▄█▄▄█▄████░█░░░
+                ░░░░█░░░░▀▀▄░█░░░█░█▀██████░█░░
+                ░░░░░▀▄░░░░░▀▀▄▄▄█▄█▄█▄█▄▀░░█░░
+                ░░░░░░░▀▄▄░▒▒▒▒░░░░░░░░░░▒░░░█░
+                ░░░░░░░░░░▀▀▄▄░▒▒▒▒▒▒▒▒▒▒░░░░█░
+                ░░░░░░░░░░░░░░▀▄▄▄▄▄░░░░░░░░█░░`;
+                        SendMessage(XSessionToken, Channel, message).then(message => {
+                            console.log("[REVOLT]: SENT!")
+                        }).catch(error => {
+                            console.log(error)
+                        })
+                    });
+                })
+                
+
 
                 addCommand('ban', (data, sharedObj) => {
                     return new Promise((resolve, reject) => {
