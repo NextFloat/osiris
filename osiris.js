@@ -598,7 +598,7 @@ Login(email, password).then(data => {
                 // NEVER FORGET TO UPDATE THIS!
                 addCommand('help', (data, sharedObj) => {
                     const Channel = data.ChannelId
-                    SendMessage(XSessionToken, Channel, `${markdown("encrypt <message>\ndecrypt <message> <key>\ninsult\nlenny\nshrug\nban @user\nunban @user\ngayrate @user\n8ball <question>\ntext <color> <type> <message>\ncock @user\nbird\nkanye\nchucknorris\ndog\ncat\nrobloxinfo <id>\niq @user\ninvismsg\nwyr\nascii <message>\ntrollge\naddy\nhackerphase\nidentity <face/nothing>\nslap @user\nhug @user\nkiss @user\ncoinflip\nphone\nface <male/female>\nbreakingbad\ncatfact\nshiba\nfox\nanimequote\nuselessfact")}`).then(message => {
+                    SendMessage(XSessionToken, Channel, `${markdown("encrypt <message>\ndecrypt <message> <key>\ninsult\nlenny\nshrug\nban @user\nunban @user\ngayrate @user\n8ball <question>\ntext <color> <type> <message>\ncock @user\nbird\nkanye\nquran\nchucknorris\ndog\ncat\nrobloxinfo <id>\niq @user\ninvismsg\nwyr\nascii <message>\ntrollge\naddy\nhackerphase\nidentity <face/nothing>\nslap @user\nhug @user\nkiss @user\ncoinflip\nphone\nface <male/female>\nbreakingbad\ncatfact\nshiba\nfox\nanimequote\nuselessfact")}`).then(message => {
                         console.log("[REVOLT]: SENT!")
                     })
                 })
@@ -904,6 +904,49 @@ Login(email, password).then(data => {
                         })
                     });
                 })
+
+
+// Random Quran Verse by Abdulwahab Humayun
+const TOTAL_SURAHS = 114;
+let totalAyahs;
+let surahNumber;
+let ayahNumber;
+let ayah;
+let translatedAyah;
+const SURAH_URL = 'https://api.alquran.cloud/v1/surah/';
+let newSurahURL;
+let eng = 'en.sahih';
+addCommand('quran', (data, sharedObj) => {
+    return new Promise((resolve, reject) => {
+        const Content = data.Content
+        const Channel = data.ChannelId
+        randomAyah().then(() => {
+            SendMessage(XSessionToken, Channel, `${translatedAyah} (${surahNumber}:${ayahNumber + 1})`).then(message => {
+                console.log("[REVOLT]: SENT!")
+            }).catch(error => {
+                console.log(error)
+            })
+        });
+    });
+})
+async function randomAyah() {
+    surahNumber = Math.floor(Math.random() * (TOTAL_SURAHS - 1)) + 1;
+    newSurahURL = SURAH_URL + surahNumber;
+    const response = await fetch(newSurahURL);
+    const chapterJSON = await response.json();
+    totalAyahs = chapterJSON.data.numberOfAyahs;
+    ayahNumber = Math.floor(Math.random() * totalAyahs);
+    ayah = chapterJSON.data.ayahs[ayahNumber].text;
+    let translation = await translateAyah();
+    translatedAyah = translation.data.ayahs[ayahNumber].text;
+}
+async function translateAyah() {
+    newSurahURL += '/' + eng;
+    const response = await fetch(newSurahURL);
+    const chapterJSON2 = await response.json();
+    return chapterJSON2;
+}
+
                 
                 addCommand('dog', (data, sharedObj) => {
                     return new Promise((resolve, reject) => {
