@@ -907,45 +907,45 @@ Login(email, password).then(data => {
 
 
 
-const TOTAL_SURAHS = 114;
-let totalAyahs;
-let surahNumber;
-let ayahNumber;
-let ayah;
-let translatedAyah;
-const SURAH_URL = 'https://api.alquran.cloud/v1/surah/';
-let newSurahURL;
-let eng = 'en.sahih';
-addCommand('quran', (data, sharedObj) => {
-    return new Promise((resolve, reject) => {
-        const Content = data.Content
-        const Channel = data.ChannelId
-        randomAyah().then(() => {
-            SendMessage(XSessionToken, Channel, `${translatedAyah} (${surahNumber}:${ayahNumber + 1})`).then(message => {
-                console.log("[REVOLT]: SENT!")
-            }).catch(error => {
+                            const TOTAL_SURAHS = 114;
+                            let totalAyahs;
+                            let surahNumber;
+                            let ayahNumber;
+                            let ayah;
+                            let translatedAyah;
+                            const SURAH_URL = 'https://api.alquran.cloud/v1/surah/';
+                            let newSurahURL;
+                            let eng = 'en.sahih';
+                addCommand('quran', (data, sharedObj) => {
+                return new Promise((resolve, reject) => {
+                    const Content = data.Content
+                    const Channel = data.ChannelId
+                    randomAyah().then(() => {
+                         SendMessage(XSessionToken, Channel, `${translatedAyah} (${surahNumber}:${ayahNumber + 1})`).then(message => {
+                                console.log("[REVOLT]: SENT!")
+                }).catch(error => {
                 console.log(error)
-            })
-        });
-    });
-})
-async function randomAyah() {
-    surahNumber = Math.floor(Math.random() * (TOTAL_SURAHS - 1)) + 1;
-    newSurahURL = SURAH_URL + surahNumber;
-    const response = await fetch(newSurahURL);
-    const chapterJSON = await response.json();
-    totalAyahs = chapterJSON.data.numberOfAyahs;
-    ayahNumber = Math.floor(Math.random() * totalAyahs);
-    ayah = chapterJSON.data.ayahs[ayahNumber].text;
-    let translation = await translateAyah();
-    translatedAyah = translation.data.ayahs[ayahNumber].text;
-}
-async function translateAyah() {
-    newSurahURL += '/' + eng;
-    const response = await fetch(newSurahURL);
-    const chapterJSON2 = await response.json();
-    return chapterJSON2;
-}
+                             })
+                        });
+                    });
+                })
+                async function randomAyah() {
+                    surahNumber = Math.floor(Math.random() * (TOTAL_SURAHS - 1)) + 1;
+                    newSurahURL = SURAH_URL + surahNumber;
+                    const response = await axios.get(newSurahURL);
+                    const chapterJSON = response.data;
+                    totalAyahs = chapterJSON.data.numberOfAyahs;
+                    ayahNumber = Math.floor(Math.random() * totalAyahs);
+                    ayah = chapterJSON.data.ayahs[ayahNumber].text;
+                    let translation = await translateAyah();
+                    translatedAyah = translation.data.ayahs[ayahNumber].text;
+                  }
+                  
+                  async function translateAyah() {
+                    newSurahURL += '/' + eng;
+                    const response = await axios.get(newSurahURL);
+                    return response.data;
+                  }
 
                 
                 addCommand('dog', (data, sharedObj) => {
