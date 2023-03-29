@@ -906,7 +906,7 @@ Login(email, password).then(data => {
                 })
 
 
-// Random Quran Verse by Abdulwahab Humayun
+
 const TOTAL_SURAHS = 114;
 let totalAyahs;
 let surahNumber;
