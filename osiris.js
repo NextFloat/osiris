@@ -598,7 +598,7 @@ Login(email, password).then(data => {
                 // NEVER FORGET TO UPDATE THIS!
                 addCommand('help', (data, sharedObj) => {
                     const Channel = data.ChannelId
-                    SendMessage(XSessionToken, Channel, `${markdown("encrypt <message>\ndecrypt <message> <key>\ninsult\nlenny\nshrug\nban @user\nunban @user\ngayrate @user\n8ball <question>\ntext <color> <type> <message>\ncock @user\nbird\nkanye\nquran\nchucknorris\ndog\ncat\nrobloxinfo <id>\niq @user\ninvismsg\nwyr\nascii <message>\ntrollge\naddy\nhackerphase\nidentity <face/nothing>\nslap @user\nhug @user\nkiss @user\ncoinflip\nphone\nface <male/female>\nbreakingbad\ncatfact\nshiba\nfox\nanimequote\nuselessfact")}`).then(message => {
+                    SendMessage(XSessionToken, Channel, `${markdown("encrypt <message>\ndecrypt <message> <key>\ninsult\nlenny\nshrug\nban @user\nunban @user\ngayrate @user\n8ball <question>\ntext <color> <type> <message>\ncock @user\nbird\nkanye\nquran\nchucknorris\ndog\ncat\nrobloxinfo <id>\niq @user\ninvismsg\nwyr\nascii <message>\ntrollge\naddy\nhackerphase\nidentity <face/nothing>\nslap @user\nhug @user\nkiss @user\ncoinflip\nphone\nface <male/female>\nbreakingbad\ncatfact\nshiba\nfox\nanimequote\nuselessfact\nafk <on/off>")}`).then(message => {
                         console.log("[REVOLT]: SENT!")
                     })
                 })
@@ -905,17 +905,15 @@ Login(email, password).then(data => {
                     });
                 })
 
-
-
-                            const TOTAL_SURAHS = 114;
-                            let totalAyahs;
-                            let surahNumber;
-                            let ayahNumber;
-                            let ayah;
-                            let translatedAyah;
-                            const SURAH_URL = 'https://api.alquran.cloud/v1/surah/';
-                            let newSurahURL;
-                            let eng = 'en.sahih';
+                const TOTAL_SURAHS = 114;
+                let totalAyahs;
+                let surahNumber;
+                let ayahNumber;
+                let ayah;
+                let translatedAyah;
+                const SURAH_URL = 'https://api.alquran.cloud/v1/surah/';
+                let newSurahURL;
+                let eng = 'en.sahih';
                 addCommand('quran', (data, sharedObj) => {
                 return new Promise((resolve, reject) => {
                     const Content = data.Content
@@ -929,6 +927,7 @@ Login(email, password).then(data => {
                         });
                     });
                 })
+                
                 async function randomAyah() {
                     surahNumber = Math.floor(Math.random() * (TOTAL_SURAHS - 1)) + 1;
                     newSurahURL = SURAH_URL + surahNumber;
@@ -1302,6 +1301,24 @@ Login(email, password).then(data => {
                     })
                 })
 
+                addCommand('afk', (data, sharedObj) => {
+                    const Channel = data.ChannelId
+                    const Content = data.Content
+                    const Args = getArgs(data.Content)[1]
+                    switch (Args) {
+                        case "on":
+                            SendMessage(XSessionToken, Channel, `Now AFK!`).then(message => {
+                                console.log("[REVOLT]: NOW AFK")
+                            })
+                            break;
+                        default:
+                            SendMessage(XSessionToken, Channel, `No longer AFK!`).then(message => {
+                                console.log("[REVOLT]: NO LONGER AFK")
+                            })
+                            break;
+                    }
+                })
+
                 break;
 
             case "ChannelStartTyping":
@@ -1365,8 +1382,13 @@ Login(email, password).then(data => {
                             }
                         }
                     })
-                    console.log(`[REVOLT]: Author ${Users[Message.author] ? Users[Message.author].Username : "UNKNOWN?"} (${Message.author}) sent ${Message.content}`)
-                  
+                    //-- Ping loggin' lol
+                    let PingedUser = ScanForMentionsAndExtract(Message.content)
+                    if (PingedUser) {
+                        console.log(`[REVOLT]: Author ${Users[Message.author] ? Users[Message.author].Username : "UNKNOWN?"} (${Message.author}) has pinged ${Users[PingedUser].Username}!`)
+                    } else {
+                        console.log(`[REVOLT]: Author ${Users[Message.author] ? Users[Message.author].Username : "UNKNOWN?"} (${Message.author}) sent ${Message.content}`)
+                    }
                 }
               
                 
