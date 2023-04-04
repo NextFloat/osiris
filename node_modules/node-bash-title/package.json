@@ -1,0 +1,15 @@
+{
+  "name": "node-bash-title",
+  "version": "0.0.2",
+  "description": "A simple lib to change the title of a BASH shell",
+  "main": "index.js",
+  "repository": {
+    "url": "https://github.com/uwinkler/node-bash-title.git",
+    "type": "git"
+  },
+  "bin": {
+    "set-bash-title": "set-bash-title.js"
+  },
+  "author": "Ulrich  Winkler <uwinkler@kodira.de>",
+  "license": "MIT"
+}
