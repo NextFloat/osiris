@@ -7,7 +7,7 @@ const { email, password, prefix } = require("./config.json")
 const { faker } = require('@faker-js/faker')
 const figlet = require('figlet')
 const { platform } = require("node:process")
-const nodeBashTitle = require("node-bash-title") // npm install node-bash-title --save
+const nodeBashTitle = require("node-bash-title"); // npm install node-bash-title --save
 
 nodeBashTitle('osiris')
 
@@ -16,7 +16,6 @@ if (platform == 'linux') {
 } else {
     console.clear()
 }
-
 /**
  * Command handler function.
  * @param {string} Command - The command to handle.
@@ -598,7 +597,7 @@ Login(email, password).then(data => {
                 // NEVER FORGET TO UPDATE THIS!
                 addCommand('help', (data, sharedObj) => {
                     const Channel = data.ChannelId
-                    SendMessage(XSessionToken, Channel, `${markdown("encrypt <message>\ndecrypt <message> <key>\ninsult\nlenny\nshrug\nban @user\nunban @user\ngayrate @user\n8ball <question>\ntext <color> <type> <message>\ncock @user\nbird\nkanye\nquran\nchucknorris\ndog\ncat\nrobloxinfo <id>\niq @user\ninvismsg\nwyr\nascii <message>\ntrollge\naddy\nhackerphase\nidentity <face/nothing>\nslap @user\nhug @user\nkiss @user\ncoinflip\nphone\nface <male/female>\nbreakingbad\ncatfact\nshiba\nfox\nanimequote\nuselessfact\nafk <on/off>")}`).then(message => {
+                    SendMessage(XSessionToken, Channel, `${markdown("encrypt <message>\ndecrypt <message> <key>\ninsult\nlenny\nshrug\nban @user\nunban @user\ngayrate @user\n8ball <question>\ntext <color> <type> <message>\ncock @user\nbird\nkanye\nquran\nchucknorris\ndog\ncat\nrobloxinfo <id>\niq @user\ninvismsg\nwyr\nascii <message>\ntrollge\naddy\nhackerphase\nidentity <face/nothing>\nslap @user\nhug @user\nkiss @user\ncoinflip\nphone\nface <male/female>\nbreakingbad\ncatfact\nshiba\nfox\nanimequote\nuselessfact\nafk <on/off>\ncapybara\ndailycapy\ncapyfact")}`).then(message => {
                         console.log("[REVOLT]: SENT!")
                     })
                 })
@@ -1317,6 +1316,44 @@ Login(email, password).then(data => {
                             })
                             break;
                     }
+                })
+
+                addCommand('capybara', (data, sharedObj) => {
+                    const Channel = data.ChannelId
+                    axios({
+                        method: "GET",
+                        url: "https://api.capy.lol/v1/capybara?json=true"
+                    }).then(resp => {
+                        let image = resp.data.data.url
+                        SendMessage(XSessionToken, Channel, image).then(message => { 
+                            console.log("[REVOLT]: SENT!")
+                        }).catch(err => {console.log(err)})
+                    })
+                })
+
+                addCommand('dailycapy', (data, sharedObj) => {
+                    const Channel = data.ChannelId
+                    axios({
+                        method: "GET",
+                        url: "https://api.capy.lol/v1/capyoftheday"
+                    }).then(resp => {
+                        let image = resp.data.data.url
+                        SendMessage(XSessionToken, Channel, image).then(message => { 
+                            console.log("[REVOLT]: SENT!")
+                        }).catch(err => {console.log(err)})
+                    })
+                })
+                addCommand('capyfact', (data, sharedObj) => {
+                    const Channel = data.ChannelId
+                    axios({
+                        method: "GET",
+                        url: "https://api.capy.lol/v1/fact"
+                    }).then(resp => {
+                        let image = resp.data.data.fact
+                        SendMessage(XSessionToken, Channel, image).then(message => { 
+                            console.log("[REVOLT]: SENT!")
+                        }).catch(err => {console.log(err)})
+                    })
                 })
 
                 break;
