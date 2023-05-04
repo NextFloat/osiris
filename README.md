@@ -17,5 +17,5 @@ Osiris was made to enhance the user experience on revolt.chat!
 
 - [@AggelosLua](https://github.com/AggelosLua)
 - [@g0dswisdom](https://github.com/g0dswisdom)
-- [@ananymoos](https://github.com/Eshan5643)
+- [@ananymoos](https://github.com/ananymoos1)
 - [@9xCatto](https://github.com/9xCatto)
