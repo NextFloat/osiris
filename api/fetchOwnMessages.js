@@ -4,7 +4,7 @@
  * @param {String} Channel - The channel to fetch the messages from.
  * @param {String} Limit - The limit of messages to fetch.
  * @param {String} After - The message to fetch after n date.
- * @returns {Promise<object>} The messages. 
+ * @returns {Promise<object>} The messages.
  */
 
 function FetchOwnMessages(SessionToken, Channel, Limit, After = null) {

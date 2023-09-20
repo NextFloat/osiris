@@ -8,20 +8,18 @@ Osiris was made to enhance the user experience on revolt.chat!
 - Message Encryption!
 - Commands!
 
-
 ## Demo
 
 - [Streamable](https://streamable.com/h2s5ty)
 
-
-
-
 # Making your own commands
+
 We currently do not have any wiki or documentation on how to make your own commands, but here's a quick guide on how to start making your own commands.
 
 - Go to the `commands` folder
 - Create a new file with the name of your command (Or whatever you want to name it)
 - Create your command using the following template:
+
 ```js
 function execute (XSessionToken, data, sharedObj) {
 
@@ -68,11 +66,6 @@ module.exports = {
 - The command will be automatically loaded when you start osiris
 
 I highly recommend you look at the other commands to get a better understanding of how to make your own commands.
-
-
-
-
-
 
 # Authors
 

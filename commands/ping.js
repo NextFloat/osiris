@@ -1,7 +1,7 @@
-/**  
+/**
  * - author: catto
  * - description: A simple ping command :)
-*/
+ */
 
 const { SendMessage } = require("../api/sendMessage.js");
 

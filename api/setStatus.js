@@ -1,9 +1,9 @@
 /**
- * 
+ *
  * @param {string} SessionToken The user's session token.
  * @param {string} Status The status to set.
  * @param {string} StatusText The status text to set.
- * @param {string} UserId The user's id. * 
+ * @param {string} UserId The user's id. *
  * @returns {Promise<object>} The server, username, and reason for the ban.
  */
 

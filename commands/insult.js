@@ -1,33 +1,135 @@
 const { SendMessage } = require("../api/sendMessage.js");
-const { ScanForMentionsAndExtract } = require("../api/extra/scanForMentionsAndExtract.js");
+const {
+  ScanForMentionsAndExtract,
+} = require("../api/extra/scanForMentionsAndExtract.js");
 
-
-const insults = [" is as monstrous as a sickening goatish puddle of wicked bug balls"," is as disgusting as a disgraceful zillion of hostile sorry pointless pony orifices"," is as impertinent as a sorry disgusting terrifying bundle of detestable pig droppings"," is as dishonorable as a sorry questionable fuckton of noxious smelly horse urine"," is as moldy as a deplorable barren diseased fuckload of dastardly ill lizard assholes"," is as apathetic as a detrimental filthy bucketful of hideous toxic dog excretions"," is as dreadful as a lesser toxic noxious bucket of obnoxious gruesome impertinent cat droppings"," is as bad as a hideous stupid buttload of decaying hideous slug poop"," is as noxious as a sad sick mass of barren repugnant obnoxious lizard goo"," is as wicked as a nasty puddle of foul dog dicks"," is as deformed as an ignorant goatish multitude of questionable decaying grotesque anglerfish dung"," is as repugnant as a nasty detestable bunch of pointless abhorrent donkey dung"," is as moldy as an apathetic yucky heap of stinky terrifying annoying pig assholes"," is as nasty as an abhorrent nasty bucket of decaying anglerfish spit"," is as foul as a repulsive monstrous buttload of hostile abhorrent monstrous skunk assholes"," is as futile as a horrible pile of smelly maggot ooze"," is as pointless as an unpleasant nasty buttload of puny inferior odious snake goo"," is as dreadful as a faulty slimy legion of toxic abhorrent bat skins"," is as ignorant as an atrocious horde of vile ineffectual bug goo"," is as lesser as a savage accumulation of hostile disgraceful leech dicks"," is as idiotic as a sticky boring fuckload of abhorrent annoying questionable pig shit"," is as ghastly as an unsatisfactory legion of infernal worthless dog skins"," is as unwanted as an impertinent grotesque despicable cloud of filthy lizard farts"," is as unsatisfactory as an annoying accumulation of revolting gruesome pig toenails"," is as apathetic as a noxious dirty ass-full of repugnant bug orifices"," is as questionable as an insignificant goatish faulty mound of insignificant leech balls"," is as absurd as a hostile assload of craptacular monstrous abhorrent pony shit"," is as unsatisfactory as an anal boring sad load of crazy pig dicks"," is as terrifying as a bad bunch of futile absurd hideous snake slime"," is as detrimental as a petty rude smelly bucket of ugly cockroach excretions"," is as hideous as a goatish puddle of ill crazy insignificant pony farts"," is as impertinent as an ignorant abhorrent bundle of odious awful chicken dicks"," is as dishonorable as a toxic abhorrent nasty puddle of savage toad farts"," is as nasty as a hostile impertinent obnoxious zillion of dastardly grotesque dirty cat toenails"," is as deplorable as a foul load of repellent monkey excretions"," is as hideous as an infernal pointless yucky fuckload of despicable awful abhorrent slug balls"," is as sorry as an impertinent repellent sickening assload of futile anglerfish vomit"," is as sickening as an impertinent naughty noxious bucket of futile inferior boring donkey piss"," is as crazy as a sick ugly puddle of disgraceful grotesque eel urine"," is as despicable as a rotten puddle of savage apathetic pony scrotum"," is as petty as a clumsy despicable impertinent multitude of filthy disgraceful terrifying chicken puke"," is as boring as a detrimental heap of diseased odious sticky monkey piss"," is as stinky as a terrible hideous assload of petty cat slime"," is as despicable as a sad anal terrible zillion of dirty slug balls"," is as dishonorable as a deformed apathetic obnoxious bundle of hideous bug ooze"," is as ghastly as a hideous mass of sorry pointless filthy skunk toenails"," is as pointless as a revolting noxious slimy ton of questionable leech excretions"," is as dishonorable as an awful horde of vicious slimy eel skins"," is as goatish as a barren terrifying detestable ton of repellent slug urine"," is as disgraceful as a noxious horde of annoying monkey shit"," is as worthless as a deformed myriad of repellent abhorrent unpleasant bug farts"," is as filthy as an annoying ill stupid bucketful of monstrous dreadful skunk toenails"," is as idiotic as a toxic dastardly bucketful of dastardly anglerfish orifices"," is as repulsive as an awful cloud of ugly dreadful anglerfish dicks"," is as crazy as a pointless repulsive toxic mound of vile lesser vicious snake assholes"," is as toxic as a sick smelly repugnant bag of sticky moldy dog intestines"," is as dirty as a clumsy terrifying horseload of futile apathetic ill cockroach shit"," is as bad as an infernal bucketful of repulsive pony farts"," is as deformed as a dishonorable detrimental assload of petty vicious skunk snot"," is as deplorable as a dirty heap of dishonorable cockroach urine"," is as naughty as an ill ugly load of petty horse dung"," is as dreadful as a diseased smelly sorry zillion of craptacular rotten gruesome snake skins"," is as moldy as a vile futile unpleasant assload of disgusting monstrous revolting snake toenails"," is as filthy as a vile futile puddle of lesser chicken toenails"," is as annoying as a sorry crapload of unsatisfactory annoying filthy bug dung"," is as unpleasant as an idiotic mound of dirty vicious inferior horse urine"," is as nasty as a repellent fuckload of savage horse urine"," is as petty as a deformed load of petty corrupt unsatisfactory chicken balls"," is as smelly as a grotesque bag of slimy toxic bug excretions"," is as dreadful as an inferior idiotic crazy fuckload of atrocious filthy rotten chicken stench"," is as worthless as a moldy terrifying apathetic shitload of craptacular toad dung"," is as grotesque as a rotten idiotic repugnant horde of ignorant skunk snot"," is as wicked as a yucky zillion of ghastly sticky clumsy bug toenails"," is as boring as a sick detestable cloud of unsatisfactory chicken dung"," is as dirty as an unpleasant insignificant ton of moldy terrible horse poop"," is as slimy as a dirty annoying puddle of annoying lizard excretions"," is as disgraceful as an annoying grotesque pointless legion of monstrous futile donkey intestines"," is as questionable as a corrupt puddle of puny sorry corrupt snake skins"," is as moldy as a noxious toxic puny plate of craptacular maggot ooze"," is as foul as a dreadful disgraceful mass of insignificant gruesome toad farts"," is as smelly as a clumsy apathetic horde of deformed anglerfish snot"," is as vicious as a sorry shitload of toxic questionable eel vomit"," is as grotesque as an odious cloud of ineffectual sickening revolting pig shit"," is as puny as an unpleasant assload of unwanted pony toenails"," is as repugnant as a horrible odious boring ass-full of atrocious pig skins"," is as gruesome as a bad horseload of hostile detestable terrible snake slime"," is as infernal as a ghastly dastardly crapload of hideous eel goo"," is as sick as a hostile dishonorable multitude of petty nasty foul slug spit"," is as rude as a questionable filthy unsatisfactory assload of toxic pig dung"," is as craptacular as a ghastly sickening horrible pile of naughty filthy toxic cockroach stench"," is as obnoxious as an anal questionable ineffectual legion of unwanted decaying sad rat stench"," is as monstrous as a dreadful bunch of sick apathetic dog intestines"," is as stupid as an ineffectual mass of vile nasty sick dog farts"," is as sickening as a revolting clumsy dreadful stack of repellent clumsy gruesome bug stench"," is as despicable as an atrocious gruesome dishonorable bundle of terrible detrimental stupid eel scrotum"," is as ill as a goatish horde of ugly abhorrent skunk dung"," is as wicked as a disgraceful legion of dreadful lizard dung"," is as hideous as a foul apathetic annoying fuckton of nasty rat dicks"," is as nasty as a horrible ill myriad of pointless monkey snot"," is as naughty as a sticky myriad of lesser obnoxious rat skins"]
+const insults = [
+  " is as monstrous as a sickening goatish puddle of wicked bug balls",
+  " is as disgusting as a disgraceful zillion of hostile sorry pointless pony orifices",
+  " is as impertinent as a sorry disgusting terrifying bundle of detestable pig droppings",
+  " is as dishonorable as a sorry questionable fuckton of noxious smelly horse urine",
+  " is as moldy as a deplorable barren diseased fuckload of dastardly ill lizard assholes",
+  " is as apathetic as a detrimental filthy bucketful of hideous toxic dog excretions",
+  " is as dreadful as a lesser toxic noxious bucket of obnoxious gruesome impertinent cat droppings",
+  " is as bad as a hideous stupid buttload of decaying hideous slug poop",
+  " is as noxious as a sad sick mass of barren repugnant obnoxious lizard goo",
+  " is as wicked as a nasty puddle of foul dog dicks",
+  " is as deformed as an ignorant goatish multitude of questionable decaying grotesque anglerfish dung",
+  " is as repugnant as a nasty detestable bunch of pointless abhorrent donkey dung",
+  " is as moldy as an apathetic yucky heap of stinky terrifying annoying pig assholes",
+  " is as nasty as an abhorrent nasty bucket of decaying anglerfish spit",
+  " is as foul as a repulsive monstrous buttload of hostile abhorrent monstrous skunk assholes",
+  " is as futile as a horrible pile of smelly maggot ooze",
+  " is as pointless as an unpleasant nasty buttload of puny inferior odious snake goo",
+  " is as dreadful as a faulty slimy legion of toxic abhorrent bat skins",
+  " is as ignorant as an atrocious horde of vile ineffectual bug goo",
+  " is as lesser as a savage accumulation of hostile disgraceful leech dicks",
+  " is as idiotic as a sticky boring fuckload of abhorrent annoying questionable pig shit",
+  " is as ghastly as an unsatisfactory legion of infernal worthless dog skins",
+  " is as unwanted as an impertinent grotesque despicable cloud of filthy lizard farts",
+  " is as unsatisfactory as an annoying accumulation of revolting gruesome pig toenails",
+  " is as apathetic as a noxious dirty ass-full of repugnant bug orifices",
+  " is as questionable as an insignificant goatish faulty mound of insignificant leech balls",
+  " is as absurd as a hostile assload of craptacular monstrous abhorrent pony shit",
+  " is as unsatisfactory as an anal boring sad load of crazy pig dicks",
+  " is as terrifying as a bad bunch of futile absurd hideous snake slime",
+  " is as detrimental as a petty rude smelly bucket of ugly cockroach excretions",
+  " is as hideous as a goatish puddle of ill crazy insignificant pony farts",
+  " is as impertinent as an ignorant abhorrent bundle of odious awful chicken dicks",
+  " is as dishonorable as a toxic abhorrent nasty puddle of savage toad farts",
+  " is as nasty as a hostile impertinent obnoxious zillion of dastardly grotesque dirty cat toenails",
+  " is as deplorable as a foul load of repellent monkey excretions",
+  " is as hideous as an infernal pointless yucky fuckload of despicable awful abhorrent slug balls",
+  " is as sorry as an impertinent repellent sickening assload of futile anglerfish vomit",
+  " is as sickening as an impertinent naughty noxious bucket of futile inferior boring donkey piss",
+  " is as crazy as a sick ugly puddle of disgraceful grotesque eel urine",
+  " is as despicable as a rotten puddle of savage apathetic pony scrotum",
+  " is as petty as a clumsy despicable impertinent multitude of filthy disgraceful terrifying chicken puke",
+  " is as boring as a detrimental heap of diseased odious sticky monkey piss",
+  " is as stinky as a terrible hideous assload of petty cat slime",
+  " is as despicable as a sad anal terrible zillion of dirty slug balls",
+  " is as dishonorable as a deformed apathetic obnoxious bundle of hideous bug ooze",
+  " is as ghastly as a hideous mass of sorry pointless filthy skunk toenails",
+  " is as pointless as a revolting noxious slimy ton of questionable leech excretions",
+  " is as dishonorable as an awful horde of vicious slimy eel skins",
+  " is as goatish as a barren terrifying detestable ton of repellent slug urine",
+  " is as disgraceful as a noxious horde of annoying monkey shit",
+  " is as worthless as a deformed myriad of repellent abhorrent unpleasant bug farts",
+  " is as filthy as an annoying ill stupid bucketful of monstrous dreadful skunk toenails",
+  " is as idiotic as a toxic dastardly bucketful of dastardly anglerfish orifices",
+  " is as repulsive as an awful cloud of ugly dreadful anglerfish dicks",
+  " is as crazy as a pointless repulsive toxic mound of vile lesser vicious snake assholes",
+  " is as toxic as a sick smelly repugnant bag of sticky moldy dog intestines",
+  " is as dirty as a clumsy terrifying horseload of futile apathetic ill cockroach shit",
+  " is as bad as an infernal bucketful of repulsive pony farts",
+  " is as deformed as a dishonorable detrimental assload of petty vicious skunk snot",
+  " is as deplorable as a dirty heap of dishonorable cockroach urine",
+  " is as naughty as an ill ugly load of petty horse dung",
+  " is as dreadful as a diseased smelly sorry zillion of craptacular rotten gruesome snake skins",
+  " is as moldy as a vile futile unpleasant assload of disgusting monstrous revolting snake toenails",
+  " is as filthy as a vile futile puddle of lesser chicken toenails",
+  " is as annoying as a sorry crapload of unsatisfactory annoying filthy bug dung",
+  " is as unpleasant as an idiotic mound of dirty vicious inferior horse urine",
+  " is as nasty as a repellent fuckload of savage horse urine",
+  " is as petty as a deformed load of petty corrupt unsatisfactory chicken balls",
+  " is as smelly as a grotesque bag of slimy toxic bug excretions",
+  " is as dreadful as an inferior idiotic crazy fuckload of atrocious filthy rotten chicken stench",
+  " is as worthless as a moldy terrifying apathetic shitload of craptacular toad dung",
+  " is as grotesque as a rotten idiotic repugnant horde of ignorant skunk snot",
+  " is as wicked as a yucky zillion of ghastly sticky clumsy bug toenails",
+  " is as boring as a sick detestable cloud of unsatisfactory chicken dung",
+  " is as dirty as an unpleasant insignificant ton of moldy terrible horse poop",
+  " is as slimy as a dirty annoying puddle of annoying lizard excretions",
+  " is as disgraceful as an annoying grotesque pointless legion of monstrous futile donkey intestines",
+  " is as questionable as a corrupt puddle of puny sorry corrupt snake skins",
+  " is as moldy as a noxious toxic puny plate of craptacular maggot ooze",
+  " is as foul as a dreadful disgraceful mass of insignificant gruesome toad farts",
+  " is as smelly as a clumsy apathetic horde of deformed anglerfish snot",
+  " is as vicious as a sorry shitload of toxic questionable eel vomit",
+  " is as grotesque as an odious cloud of ineffectual sickening revolting pig shit",
+  " is as puny as an unpleasant assload of unwanted pony toenails",
+  " is as repugnant as a horrible odious boring ass-full of atrocious pig skins",
+  " is as gruesome as a bad horseload of hostile detestable terrible snake slime",
+  " is as infernal as a ghastly dastardly crapload of hideous eel goo",
+  " is as sick as a hostile dishonorable multitude of petty nasty foul slug spit",
+  " is as rude as a questionable filthy unsatisfactory assload of toxic pig dung",
+  " is as craptacular as a ghastly sickening horrible pile of naughty filthy toxic cockroach stench",
+  " is as obnoxious as an anal questionable ineffectual legion of unwanted decaying sad rat stench",
+  " is as monstrous as a dreadful bunch of sick apathetic dog intestines",
+  " is as stupid as an ineffectual mass of vile nasty sick dog farts",
+  " is as sickening as a revolting clumsy dreadful stack of repellent clumsy gruesome bug stench",
+  " is as despicable as an atrocious gruesome dishonorable bundle of terrible detrimental stupid eel scrotum",
+  " is as ill as a goatish horde of ugly abhorrent skunk dung",
+  " is as wicked as a disgraceful legion of dreadful lizard dung",
+  " is as hideous as a foul apathetic annoying fuckton of nasty rat dicks",
+  " is as nasty as a horrible ill myriad of pointless monkey snot",
+  " is as naughty as a sticky myriad of lesser obnoxious rat skins",
+];
 
 function execute(XSessionToken, data, sharedObj) {
-    const Content = data.Content;
-    const User = ScanForMentionsAndExtract(Content);
-    const Channel = data.ChannelId;
-    SendMessage(
-      XSessionToken,
-      Channel,
-      `<@${User}> ${insults[Math.floor(Math.random() * insults.length)]}`,
-    ).then((message) => {
-      console.log("[REVOLT]: SENT!");
-    });
-};
+  const Content = data.Content;
+  const User = ScanForMentionsAndExtract(Content);
+  const Channel = data.ChannelId;
+  SendMessage(
+    XSessionToken,
+    Channel,
+    `<@${User}> ${insults[Math.floor(Math.random() * insults.length)]}`,
+  ).then((message) => {
+    console.log("[REVOLT]: SENT!");
+  });
+}
 
 module.exports = {
-    name: "insult",
-    description: "Insult a user.",
-    native: true,
-    category: "text",
-    usage: "insult <user>",
-    arguments: [
-        {
-            name: "user",
-            type: "USER_MENTION",
-        },
-        ],
-    execute,
+  name: "insult",
+  description: "Insult a user.",
+  native: true,
+  category: "text",
+  usage: "insult <user>",
+  arguments: [
+    {
+      name: "user",
+      type: "USER_MENTION",
+    },
+  ],
+  execute,
 };
