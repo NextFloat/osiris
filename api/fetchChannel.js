@@ -1,26 +1,21 @@
 /**
- * This function attempts to send a message to a recipient.
+ * This function attempts to fetch a channels information.
  * @param {string} SessionToken - The session token retrieved from the Login() function.
- * @param {string} ChannelId - The Channel id.
- * @param {string} Message - The message to send.
- * @returns {Object} The session info and user info.
+ * @param {string} ChannelId - The id of the channel.
+ * @returns {Object} The channel information.
  */
 
 
-const { generateNonce } = require("../api/extra/generateNonce.js");
 const axios = require("axios");
 const ulid = require("ulid");
-function SendMessage(SessionToken, ChannelId, Message) {
+function FetchChannel(SessionToken, ChannelId) {
     return new Promise((resolve, reject) => {
-        let Nonce = generateNonce()
         axios({
-            method: "POST",
-            url: `https://api.revolt.chat/channels/${ChannelId}/messages`,
-            data: { "content": Message, "replies": [] },
+            method: "GET",
+            url: `https://api.revolt.chat/channels/${ChannelId}`,
             headers: {
                 Host: 'api.revolt.chat',
                 Connection: 'keep-alive',
-                'Content-Length': { "content": Message, "replies": [] }.length,
                 Accept: 'application/json, text/plain, */*',
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36',
                 'Idempotency-Key': ulid.ulid(),
@@ -35,17 +30,30 @@ function SendMessage(SessionToken, ChannelId, Message) {
             Origin: "https://app.revolt.chat",
             Referer: "https://app.revolt.chat/"
         }).then(response => {
-            return resolve({
-                Nonce: response.data.nonce,
-                ChannelId: response.data.channel,
-                Author: response.data.author,
-                Content: response.data.content,
-                MessageId: response.data._id
-            })
+            if (response.data?.server) {
+                return resolve({
+                    ChannelType: response.data.channel_type,
+                    ChannelId: response.data._id,
+                    ChannelName: response.data.name,
+                    ServerId: response.data.server
+
+                })
+            } else {
+                return resolve({
+                    ChannelType: response.data.channel_type,
+                    ChannelId: response.data._id
+                })
+            }
+
         }).catch(response => {
-            return reject(JSON.stringify(response.response.data))
+            try {
+                return reject(JSON.stringify(response.response.data))
+            }
+            catch (error) {
+                return reject(error)
+            }
         })
     })
 }
 
-module.exports = { SendMessage };
+module.exports = { FetchChannel };
