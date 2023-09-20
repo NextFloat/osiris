@@ -1,4 +1,10 @@
+/**  
+ * - author: catto
+ * - description: A simple ping command :)
+*/
+
 const { SendMessage } = require("../api/sendMessage.js");
+
 console.log(SendMessage);
 function execute(XSessionToken, data, sharedObj) {
   const Channel = data.ChannelId;
@@ -9,6 +15,10 @@ function execute(XSessionToken, data, sharedObj) {
 
 module.exports = {
   name: "ping",
-  description: "Ping!",
+  description: "Simple ping command for testing purposes :)",
+  native: true,
+  category: "fun",
+  usage: "ping",
+  arguments: [],
   execute,
 };

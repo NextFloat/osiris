@@ -10,6 +10,7 @@ const nodeBashTitle = require("node-bash-title"); // npm install node-bash-title
 
 // Require custom revolt API functions
 const { generateNonce } = require("./api/extra/generateNonce.js");
+const { ScanForMentionsAndExtract } = require("./api/extra/scanForMentionsAndExtract.js");
 const { setStatus } = require("./api/setStatus.js");
 const { SendMessage } = require("./api/sendMessage.js");
 const { FetchChannel } = require("./api/fetchChannel.js");
@@ -52,23 +53,30 @@ function downloadFile(url, fileextension = null) {
 
 // Function to import all commands from the commands folder
 function importCommands() {
-  const commands = {};
-  const commandsPath = path.join(__dirname, "commands");
+    const commands = {};
+    const commandsPath = path.join(__dirname, "commands");
 
-  // Read all files in the commands folder
-  const commandFiles = fs.readdirSync(commandsPath);
+    // Read all files in the commands folder
+    const commandFiles = fs.readdirSync(commandsPath);
 
-  // Import each command file dynamically
-  for (const file of commandFiles) {
-    const filePath = path.join(commandsPath, file);
-    console.log(filePath);
-    // Add require to commands list
-    let _command = require(filePath);
-    commands[_command.name] = _command.execute;
-  }
+    // Import each command file dynamically
+    for (const file of commandFiles) {
+        const filePath = path.join(commandsPath, file);
+        console.log(filePath);
+        // Add require to commands list
+        let _command = require(filePath);
+        commands[_command.name] = {
+            execute: _command.execute,
+            description: _command.description,
+            category: _command.category,
+            native: _command.native,
+            usage: _command.usage,
+            args: _command.arguments,
+        };
+    }
 
-  // Access the registered commands from osiris.commands
-  return commands;
+    // Access the registered commands from osiris.commands
+    return commands;
 }
 
 // Register a command
@@ -95,6 +103,14 @@ if (platform == "linux") {
 }
 
 console.log(importedCommands);
+
+// Log all importer commands their descriptions
+for (const command in importedCommands) {
+  console.log(
+    `[REVOLT]: Loaded command ${command} with description ${importedCommands[command].description}`,
+  );
+}
+
 /**
  * Command handler function.
  * @param {string} Command - The command to handle.
@@ -160,6 +176,61 @@ function handleCommand(command, data, sharedObj) {
   command = command.slice(prefix.length);
   command = command.split(" ")[0].toLowerCase();
   if (commands[command]) {
+    // Check for arguments, their position, their type
+    const args = getArgs(data.Content);
+
+    const commandArgs = importedCommands[command]?.args;
+
+    
+    if (commandArgs) {
+        console.log("Command has arguments")
+        // Check if the command has arguments
+        if (args.length-1 < commandArgs.length) { // -1 because the first argument is the command itself
+            // Check if the command has enough arguments
+            console.log("Command has too few arguments")
+            return;
+        }
+        // Check if the command has too many arguments
+        if (args.length-1 > commandArgs.length) { // -1 because the first argument is the command itself
+            console.log("Command has too many arguments")
+            return;
+        }
+        // Check if the arguments are of the correct type
+        for (let i = 0; i < commandArgs.length; i++) {
+            const arg = args[i+1]; // +1 because the first argument is the command itself
+            const commandArg = commandArgs[i];
+            if (commandArg.type) {
+                // Check if the argument has a type
+                if (commandArg.type === "NUMBER") {
+                    // Check if the argument is a number
+                    if (isNaN(arg)) {
+                        console.log("Command has invalid argument type (not a number)")
+                        return;
+                    }
+                }
+
+                if (commandArg.type === "STRING") {
+                    // Check if the argument is a string
+                    if (typeof arg !== "string") {
+                        console.log("Command has invalid argument type (not a string)")
+                        return;
+                    }
+                }
+                    
+
+                if (commandArg.type === "USER" || commandArg.type === "USER_MENTION" || commandArg.type === "MENTION") {
+                    // Check if the argument is a user mention
+                    console.log(arg);
+                    if (!arg.startsWith("<@") || !arg.endsWith(">")) {
+                        console.log("Command has invalid argument type (not a user mention)")
+                        return;
+                    }
+                }
+            }
+        }
+    }
+
+
     commands[command](data, sharedObj);
   } else {
     console.log(`Unknown command: ${command}`);
@@ -199,25 +270,6 @@ function generateIdempotencyKey() {
   return result;
 }
 
-/**
- * Scans a string for mentions in the format <@USERID> and extracts the USERID.
- * @param {string} Content - The string to scan for mentions.
- * @returns {string} The USERID if a mention is found, otherwise null.
- */
-function ScanForMentionsAndExtract(Content) {
-  // Catch errors
-  if (!Content) return null;
-  // Scan for mentions
-
-  try {
-    var Scan = Content.match(/<@[\w\d]+>/);
-    if (Scan) {
-      return Scan[0].substring(2, Scan[0].length - 1);
-    }
-  } catch (error) {
-    console.error(error);
-  }
-}
 
 /* This function deletes messages individually since the CustomBulkDeleteMessages returns a 'MissingPermission' error when you are missing the 'ManageMessages' permission or the command is not used in a server. 
 
@@ -479,6 +531,28 @@ Login(email, password)
 
           //ADD CMDS
 
+
+          /*
+            Dynamically add all imported commands to the commands object.
+            This allows us to just code commands and place them in the commands folder without touching the main code.
+          */
+
+            for (const command in importedCommands) {
+                addCommand(command, (data, sharedObj) => {
+                    importedCommands[command].execute(XSessionToken, data, sharedObj);
+                });
+            };
+                
+
+            /*
+            addCommand("doomquote", (data, sharedObj) => {
+                importedCommands["doomquote"](XSessionToken, data, sharedObj);
+              });
+
+            */
+
+
+        /*
           // NEVER FORGET TO UPDATE THIS!
           addCommand("help", (data, sharedObj) => {
             const Channel = data.ChannelId;
@@ -492,10 +566,52 @@ Login(email, password)
               console.log("[REVOLT]: SENT!");
             });
           });
+          */
 
+        // Create a dynamic help command that uses the imported commands object, it should list all commands with their names and descriptions and sort them by category.
+        addCommand("help", (data, sharedObj) => {
+            const Channel = data.ChannelId;
+            var Categories = {};
+            for (const command in importedCommands) {
+                console.log(command);
+                const Category = importedCommands[command].category;
+                if (!Categories[Category]) {
+                    Categories[Category] = [];
+                }
+                
+                const args = importedCommands[command].args;
+                let usage = command;
+                if (args) {
+                    usage += " ";
+                    for (const arg of args) {
+                        usage += `<${arg.name} (${arg.type})> `;
+                    }
+                }
+                Categories[Category].push({
+                    name: command,
+                    description: importedCommands[command].description,
+                    usage: usage,
+                });
+            }
+            console.log(Categories);
+            var message = "";
+            for (const category in Categories) {
+                message += `**${category}**\n`;
+                for (const command of Categories[category]) {
+                    message += `\`${command.usage}\` - ${command.description}\n`;
+                }
+                message += "\n";
+            }
+            SendMessage(XSessionToken, Channel, message).then((message) => {
+                console.log("[REVOLT]: SENT!");
+            });
+        });
+
+          /*
           addCommand("ping", (data, sharedObj) => {
             importedCommands["ping"](XSessionToken, data, sharedObj);
           });
+          */
 
           addCommand("massdelete", (data, sharedObj) => {
             const Channel = data.ChannelId;
@@ -526,26 +642,7 @@ Login(email, password)
             }
           });
 
-          addCommand("doomquote", (data, sharedObj) => {
-            const Channel = data.ChannelId;
-            const MessageId = data.MessageId;
-            const Content = data.Content;
 
-            const Quotes = [
-              "Rip and tear, until it is done.",
-              "You are but one man - they are no longer your people to save!",
-              "The only thing they fear... is you.",
-              "Welcome home, great Slayer.",
-            ];
-
-            SendMessage(
-              XSessionToken,
-              Channel,
-              `[REVOLT]: ${Quotes[Math.floor(Math.random() * Quotes.length)]}`,
-            ).then((message) => {
-              console.log("[REVOLT]: SENT!");
-            });
-          });
 
           addCommand("spotify", (data, sharedObj) => {
             const Channel = data.ChannelId;
@@ -671,34 +768,9 @@ Login(email, password)
             });
           });
 
-          addCommand("insult", (data, sharedObj) => {
-            return new Promise((resolve, reject) => {
-              const Content = data.Content;
-              const User = ScanForMentionsAndExtract(Content);
-              const Channel = data.ChannelId;
-              SendMessage(
-                XSessionToken,
-                Channel,
-                `Youre so fucking dependant on women. Fucking weakling, Get a life <@${User}>`,
-              ).then((message) => {
-                console.log("[REVOLT]: SENT!");
-              });
-            });
-          });
 
-          addCommand("lenny", (data, sharedObj) => {
-            return new Promise((resolve, reject) => {
-              const Content = data.Content;
-              const Channel = data.ChannelId;
-              SendMessage(XSessionToken, Channel, "( ͡° ͜ʖ ͡°)")
-                .then((message) => {
-                  console.log("[REVOLT]: SENT!");
-                })
-                .catch((error) => {
-                  console.log(error);
-                });
-            });
-          });
+
+
 
           addCommand("shrug", (data, sharedObj) => {
             return new Promise((resolve, reject) => {
