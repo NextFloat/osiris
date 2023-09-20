@@ -184,11 +184,11 @@ function Login(Email, Password) {
         axios({
             method: "POST",
             url: `https://api.revolt.chat/auth/session/login`,
-            data: { "email": Email, "password": Password, "friendly_name": "chrome on Windows 10" },
+            data: { "email": Email, "password": Password, "friendly_name": "Revolt.js Selfbot for Revolt.chat" },
             headers: {
                 Host: 'api.revolt.chat',
                 Connection: 'keep-alive',
-                'Content-Length': { "email": Email, "password": Password, "friendly_name": "chrome on Windows 10" }.length,
+                'Content-Length': { "email": Email, "password": Password, "friendly_name": "Revolt.js Selfbot for Revolt.chat" }.length,
                 'sec-ch-ua': '"Google Chrome";v="111", "Not(A:Brand";v="8", "Chromium";v="111"',
                 Accept: 'application/json, text/plain, */*',
                 'Content-Type': 'application/json',
