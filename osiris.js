@@ -1644,7 +1644,7 @@ Login(email, password).then(data => {
                     const Channel = data.ChannelId
                     axios({
                         method: "GET",
-                        url: "https://api.capy.lol/v1/capyoftheday"
+                        url: "https://api.capy.lol/v1/capyoftheday?json=true"
                     }).then(resp => {
                         let image = resp.data.data.url
                         SendMessage(XSessionToken, Channel, image).then(message => {
