@@ -1,25 +1,29 @@
 /**
- * This function attempts to send a message to a recipient.
+ * This function deletes a message sent from someone.
  * @param {string} SessionToken - The session token retrieved from the Login() function.
- * @param {string} ChannelId - The Channel id.
- * @param {string} Message - The message to send.
- * @returns {Object} The session info and user info.
+ * @param {string} Channel - The channel the message has been sent into.
+ * @param {string} MessageId - The message identifier.
  */
 
-const { generateNonce } = require("../api/extra/generateNonce.js");
 const axios = require("axios");
 const ulid = require("ulid");
-function SendMessage(SessionToken, ChannelId, Message) {
+function DeleteMessage(SessionToken, Channel, MessageId) {
   return new Promise((resolve, reject) => {
-    let Nonce = generateNonce();
+    // Check if message is set
+    if (!MessageId) {
+      return reject("MessageId is not set");
+    }
+    // Check if channel is set
+    if (!Channel) {
+      return reject("Channel is not set");
+    }
+
     axios({
-      method: "POST",
-      url: `https://api.revolt.chat/channels/${ChannelId}/messages`,
-      data: { content: Message, replies: [] },
+      method: "DELETE",
+      url: `https://api.revolt.chat/channels/${Channel}/messages/${MessageId} `,
       headers: {
         Host: "api.revolt.chat",
         Connection: "keep-alive",
-        "Content-Length": { content: Message, replies: [] }.length,
         Accept: "application/json, text/plain, */*",
         "User-Agent":
           "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36",
@@ -37,17 +41,25 @@ function SendMessage(SessionToken, ChannelId, Message) {
     })
       .then((response) => {
         return resolve({
-          Nonce: response.data.nonce,
-          ChannelId: response.data.channel,
-          Author: response.data.author,
-          Content: response.data.content,
-          MessageId: response.data._id,
+          Status: "Deleted",
         });
       })
       .catch((response) => {
+        // If message is not found
+        if (response.response.data?.type == "NotFound") {
+          return reject("Message not found");
+        }
+
+        // Check if status code is 429
+        if (response.response.status == 429) {
+          console.log(response);
+          return reject("Rate limited");
+        }
+
+        console.log(response);
         return reject(JSON.stringify(response.response.data));
       });
   });
 }
 
-module.exports = { SendMessage };
+module.exports = { DeleteMessage };

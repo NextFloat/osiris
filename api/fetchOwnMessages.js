@@ -1,17 +1,24 @@
-const axios = require("axios");
-const ulid = require("ulid");
+/**
+ * This function fetches your own messages from a channel.
+ * @param {String} SessionToken - The session token retrieved from the Login() function.
+ * @param {String} Channel - The channel to fetch the messages from.
+ * @param {String} Limit - The limit of messages to fetch.
+ * @param {String} After - The message to fetch after n date.
+ * @returns
+ */
 
-function setStatus(SessionToken, Status, StatusText, UserId) {
+function FetchOwnMessages(SessionToken, Channel, Limit, After = null) {
   return new Promise((resolve, reject) => {
+    const params = {
+      limit: Limit,
+    };
+    if (After) {
+      console.log(After);
+      params.after = After;
+    }
     axios({
-      method: "PATCH",
-      url: `https://api.revolt.chat/users/${UserId}`,
-      data: {
-        status: {
-          text: StatusText,
-          presence: Status,
-        },
-      },
+      method: "GET",
+      url: `https://api.revolt.chat/channels/${Channel}/messages`,
       headers: {
         Host: "api.revolt.chat",
         Connection: "keep-alive",
@@ -29,16 +36,20 @@ function setStatus(SessionToken, Status, StatusText, UserId) {
       },
       Origin: "https://app.revolt.chat",
       Referer: "https://app.revolt.chat/",
+      data: {
+        params,
+      },
     })
       .then((response) => {
         return resolve({
-          success: true,
+          Messages: response.data,
         });
       })
       .catch((response) => {
+        console.log(response);
         return reject(JSON.stringify(response.response.data));
       });
   });
 }
 
-module.exports = { setStatus };
+module.exports = { FetchOwnMessages };

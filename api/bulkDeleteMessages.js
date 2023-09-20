@@ -1,17 +1,16 @@
-const axios = require("axios");
-const ulid = require("ulid");
+/**
+ *
+ * @param {String} SessionToken - The session token retrieved from the Login() function.
+ * @param {String} Channel - The channel to delete the messages from.
+ * @param {Array} MessageIds - Array of message ids to delete.
+ * @returns
+ */
 
-function setStatus(SessionToken, Status, StatusText, UserId) {
+function BulkDeleteMessages(SessionToken, Channel, MessageIds) {
   return new Promise((resolve, reject) => {
     axios({
-      method: "PATCH",
-      url: `https://api.revolt.chat/users/${UserId}`,
-      data: {
-        status: {
-          text: StatusText,
-          presence: Status,
-        },
-      },
+      method: "DELETE",
+      url: `https://api.revolt.chat/channels/${Channel}/messages/bulk`,
       headers: {
         Host: "api.revolt.chat",
         Connection: "keep-alive",
@@ -29,16 +28,20 @@ function setStatus(SessionToken, Status, StatusText, UserId) {
       },
       Origin: "https://app.revolt.chat",
       Referer: "https://app.revolt.chat/",
+      data: {
+        ids: MessageIds,
+      },
     })
       .then((response) => {
         return resolve({
-          success: true,
+          Status: "Deleted",
         });
       })
       .catch((response) => {
+        console.log(response);
         return reject(JSON.stringify(response.response.data));
       });
   });
 }
 
-module.exports = { setStatus };
+module.exports = { BulkDeleteMessages };

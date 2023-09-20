@@ -1,25 +1,20 @@
 /**
- * This function attempts to send a message to a recipient.
+ * This function unbans a user from a server.
  * @param {string} SessionToken - The session token retrieved from the Login() function.
- * @param {string} ChannelId - The Channel id.
- * @param {string} Message - The message to send.
- * @returns {Object} The session info and user info.
+ * @param {string} Server - The server to unban the user from.
+ * @param {string} UserId - The person to unban.
  */
 
-const { generateNonce } = require("../api/extra/generateNonce.js");
 const axios = require("axios");
 const ulid = require("ulid");
-function SendMessage(SessionToken, ChannelId, Message) {
+function UnBanUser(SessionToken, Server, UserId) {
   return new Promise((resolve, reject) => {
-    let Nonce = generateNonce();
     axios({
-      method: "POST",
-      url: `https://api.revolt.chat/channels/${ChannelId}/messages`,
-      data: { content: Message, replies: [] },
+      method: "DELETE",
+      url: `https://api.revolt.chat/servers/${Server}/bans/${UserId}`,
       headers: {
         Host: "api.revolt.chat",
         Connection: "keep-alive",
-        "Content-Length": { content: Message, replies: [] }.length,
         Accept: "application/json, text/plain, */*",
         "User-Agent":
           "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36",
@@ -36,18 +31,21 @@ function SendMessage(SessionToken, ChannelId, Message) {
       Referer: "https://app.revolt.chat/",
     })
       .then((response) => {
-        return resolve({
-          Nonce: response.data.nonce,
-          ChannelId: response.data.channel,
-          Author: response.data.author,
-          Content: response.data.content,
-          MessageId: response.data._id,
-        });
+        if (response.data?.type == "NotFound") {
+          return reject("Ban/User not found");
+        } else {
+          return resolve({
+            Server: response.data._id.server,
+            UserName: response.data._id.user,
+            Reason: response.data._id.reason,
+          });
+        }
       })
       .catch((response) => {
+        console.log(response);
         return reject(JSON.stringify(response.response.data));
       });
   });
 }
 
-module.exports = { SendMessage };
+module.exports = { UnBanUser };

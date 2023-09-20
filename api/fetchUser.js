@@ -1,25 +1,22 @@
 /**
- * This function attempts to send a message to a recipient.
+ * This function fetches a users information by their unique id.
  * @param {string} SessionToken - The session token retrieved from the Login() function.
- * @param {string} ChannelId - The Channel id.
- * @param {string} Message - The message to send.
- * @returns {Object} The session info and user info.
+ * @param {string} UserId - The person to retrieve the information from.
+ * @returns {Object} User information.
  */
 
 const { generateNonce } = require("../api/extra/generateNonce.js");
 const axios = require("axios");
 const ulid = require("ulid");
-function SendMessage(SessionToken, ChannelId, Message) {
+function FetchUser(SessionToken, UserId) {
   return new Promise((resolve, reject) => {
     let Nonce = generateNonce();
     axios({
-      method: "POST",
-      url: `https://api.revolt.chat/channels/${ChannelId}/messages`,
-      data: { content: Message, replies: [] },
+      method: "GET",
+      url: `https://api.revolt.chat/users/${UserId}`,
       headers: {
         Host: "api.revolt.chat",
         Connection: "keep-alive",
-        "Content-Length": { content: Message, replies: [] }.length,
         Accept: "application/json, text/plain, */*",
         "User-Agent":
           "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36",
@@ -37,17 +34,15 @@ function SendMessage(SessionToken, ChannelId, Message) {
     })
       .then((response) => {
         return resolve({
-          Nonce: response.data.nonce,
-          ChannelId: response.data.channel,
-          Author: response.data.author,
-          Content: response.data.content,
-          MessageId: response.data._id,
+          UserId: response.data._id,
+          UserName: response.data.username,
         });
       })
       .catch((response) => {
+        console.log(response);
         return reject(JSON.stringify(response.response.data));
       });
   });
 }
 
-module.exports = { SendMessage };
+module.exports = { FetchUser };
