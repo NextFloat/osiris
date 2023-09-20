@@ -3,6 +3,7 @@
  * @param {string} SessionToken - The session token retrieved from the Login() function.
  * @param {string} Channel - The channel the message has been sent into.
  * @param {string} MessageId - The message identifier.
+ * @returns {Promise<object>} The status of the message.
  */
 
 const axios = require("axios");

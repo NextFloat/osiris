@@ -3,7 +3,7 @@
  * @param {String} SessionToken - The session token retrieved from the Login() function.
  * @param {String} Channel - The channel to delete the messages from.
  * @param {Array} MessageIds - Array of message ids to delete.
- * @returns
+ * @returns {Promise<object>} The status of the messages.
  */
 
 function BulkDeleteMessages(SessionToken, Channel, MessageIds) {

@@ -3,6 +3,7 @@
  * @param {string} SessionToken - The session token retrieved from the Login() function.
  * @param {string} Server - The server to unban the user from.
  * @param {string} UserId - The person to unban.
+ * @returns {Promise<object>} The server, username, and reason for the ban.
  */
 
 const axios = require("axios");

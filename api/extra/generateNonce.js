@@ -4,6 +4,7 @@
  * This function generates a nonce (REVOLT FUNCTIONALITY).
  * @returns {string} The nonce.
  */
+
 function generateNonce() {
   const characters =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
