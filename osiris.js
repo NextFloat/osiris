@@ -26,8 +26,6 @@ const { FetchOwnMessages } = require("./api/fetchOwnMessages.js");
 const fs = require("fs");
 const path = require("path");
 
-
-
 // Function to import all commands from the commands folder
 function importCommands() {
   const commands = {};
