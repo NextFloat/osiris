@@ -15,7 +15,7 @@ Osiris was made to enhance the user experience on revolt.chat!
 ## Documentation
 
 For troubleshooting, installation and creating custom commands, check out the documentation:
-
+\n
 https://osiris-4.gitbook.io/osiris-documentation/
 
 # Authors
