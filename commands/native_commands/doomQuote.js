@@ -1,4 +1,4 @@
-const { SendMessage } = require("../../api/sendMessage.js");
+const { osiris } = require ("../../api/osiris.js");
 function execute(XSessionToken, data, sharedObj) {
   const Channel = data.ChannelId;
 
@@ -9,7 +9,7 @@ function execute(XSessionToken, data, sharedObj) {
     "Welcome home, great Slayer.",
   ];
 
-  SendMessage(
+  osiris.sendMessage(
     XSessionToken,
     Channel,
     `[REVOLT]: ${Quotes[Math.floor(Math.random() * Quotes.length)]}`,

@@ -6,7 +6,7 @@
  * @returns {Object} The session info and user info.
  */
 
-const { generateNonce } = require("../api/extra/generateNonce.js");
+const { generateNonce } = require("./utils/generateNonce.js");
 const axios = require("axios");
 const ulid = require("ulid");
 function SendMessage(SessionToken, ChannelId, Message) {

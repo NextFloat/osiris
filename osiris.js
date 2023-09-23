@@ -9,19 +9,7 @@ const { platform } = require("node:process");
 const nodeBashTitle = require("node-bash-title"); // npm install node-bash-title --save
 
 // Require custom revolt API functions
-const { generateNonce } = require("./api/extra/generateNonce.js");
-const {
-  ScanForMentionsAndExtract,
-} = require("./api/extra/scanForMentionsAndExtract.js");
-const { setStatus } = require("./api/setStatus.js");
-const { SendMessage } = require("./api/sendMessage.js");
-const { FetchChannel } = require("./api/fetchChannel.js");
-const { FetchUser } = require("./api/fetchUser.js");
-const { Login } = require("./api/login.js");
-const { BanUser } = require("./api/banUser.js");
-const { UnBanUser } = require("./api/unbanUser.js");
-const { DeleteMessage } = require("./api/deleteMessage.js");
-const { FetchOwnMessages } = require("./api/fetchOwnMessages.js");
+const { osiris } = require("./api/osiris.js");
 
 const fs = require("fs");
 const path = require("path");
@@ -157,7 +145,7 @@ function handleCommand(command, data, sharedObj) {
   command = command.split(" ")[0].toLowerCase();
   if (commands[command]) {
     // Check for arguments, their position, their type
-    const args = getArgs(data.Content);
+    const args = osiris.utils.getArgs(data.Content);
 
     const commandArgs = importedCommands[command]?.args;
 
@@ -255,7 +243,7 @@ function generateIdempotencyKey() {
   return result;
 }
 
-/* This function deletes messages individually since the CustomBulkDeleteMessages returns a 'MissingPermission' error when you are missing the 'ManageMessages' permission or the command is not used in a server. 
+/* This function deletes messages individually since the CustomBulkBulkDeleteMessages returns a 'MissingPermission' error when you are missing the 'ManageMessages' permission or the command is not used in a server. 
 
 New URL: https://api.revolt.chat/channels/{target}/messages/{msg}
 
@@ -268,7 +256,7 @@ function CustomBulkDeleteMessages(SessionToken, Channel, MessageIds) {
         const MessageId = MessageIds[i];
         try {
           await new Promise((resolve) => setTimeout(resolve, 1000));
-          await DeleteMessage(SessionToken, Channel, MessageId);
+          await osiris.deleteMessage(SessionToken, Channel, MessageId);
           console.log(`Message ${MessageId} deleted`);
         } catch (error) {
           console.error(`Error deleting message ${MessageId}: ${error}`);
@@ -283,14 +271,14 @@ function CustomBulkDeleteMessages(SessionToken, Channel, MessageIds) {
 
 function deleteOwnMessages(SessionToken, Channel) {
   return new Promise((resolve, reject) => {
-    FetchOwnMessages(SessionToken, Channel)
+    osiris.fetchOwnMessages(SessionToken, Channel)
       .then((data) => {
         let Messages = data.Messages;
         let MessageIds = [];
         for (let i = 0; i < Messages.length; i++) {
           MessageIds.push(Messages[i]._id);
         }
-        BulkDeleteMessages(SessionToken, Channel, MessageIds)
+        CustomBulkDeleteMessages(SessionToken, Channel, MessageIds)
           .then((data) => {
             return resolve({
               Status: "Deleted",
@@ -328,7 +316,7 @@ function animateStatus(XSessionToken, UserId, Status) {
         try {
           await new Promise((r) => setTimeout(r, 1000));
           console.log(Status.slice(0, i));
-          setStatus(XSessionToken, null, Status.slice(0, i), UserId);
+          osiris.setStatus(XSessionToken, null, Status.slice(0, i), UserId);
         } catch (error) {
           console.error(`Error setting status: ${error}`);
         }
@@ -337,11 +325,11 @@ function animateStatus(XSessionToken, UserId, Status) {
       // 🖤💚💜
       for (let i = 0; i < 3; i++) {
         try {
-          setStatus(XSessionToken, null, "🖤 Using osiris.js! 🖤", UserId);
+          osiris.setStatus(XSessionToken, null, "🖤 Using osiris.js! 🖤", UserId);
           await new Promise((r) => setTimeout(r, 500));
-          setStatus(XSessionToken, null, "💚 Using osiris.js! 💚", UserId);
+          osiris.setStatus(XSessionToken, null, "💚 Using osiris.js! 💚", UserId);
           await new Promise((r) => setTimeout(r, 500));
-          setStatus(XSessionToken, null, "💜 Using osiris.js! 💜", UserId);
+          osiris.setStatus(XSessionToken, null, "💜 Using osiris.js! 💜", UserId);
           await new Promise((r) => setTimeout(r, 500));
         } catch (error) {
           console.error(`Error setting status: ${error}`);
@@ -352,14 +340,14 @@ function animateStatus(XSessionToken, UserId, Status) {
       for (const combo of emojiCombos) {
         for (let i = 0; i < 3; i++) {
           const [emoji1, emoji2] = combo;
-          setStatus(
+          osiris.setStatus(
             XSessionToken,
             null,
             emoji1 + " Using osiris.js! " + emoji1,
             UserId,
           );
           await new Promise((r) => setTimeout(r, 500));
-          setStatus(
+          osiris.setStatus(
             XSessionToken,
             null,
             emoji2 + " Using osiris.js! " + emoji2,
@@ -374,9 +362,6 @@ function animateStatus(XSessionToken, UserId, Status) {
   animate(XSessionToken, UserId, Status);
 }
 
-function getArgs(content) {
-  return content.slice(prefix.length).trim().split(/ +/);
-}
 
 function autoUser(id) {
   return `<@${id}>`;
@@ -388,7 +373,7 @@ function markdown(content) {
 
 // F I R S T
 
-Login(email, password)
+osiris.login(email, password)
   .then((data) => {
     console.log("[REVOLT]: Fetched login info, punchin' it in!");
     let Id = data._Id;
@@ -511,7 +496,7 @@ Login(email, password)
           //    animateStatus(XSessionToken, UserId, "😺 Using osiris.js!");
           //}, 0);
 
-          setStatus(XSessionToken, null, "😺 Using osiris! 🌺", UserId);
+          osiris.setStatus(XSessionToken, null, "😺 Using osiris! 🌺", UserId);
 
           //ADD CMDS
 
@@ -537,7 +522,7 @@ Login(email, password)
           // NEVER FORGET TO UPDATE THIS!
           addCommand("help", (data, sharedObj) => {
             const Channel = data.ChannelId;
-            SendMessage(
+            osiris.sendMessage(
               XSessionToken,
               Channel,
               `${markdown(
@@ -583,7 +568,7 @@ Login(email, password)
               }
               message += "\n";
             }
-            SendMessage(XSessionToken, Channel, message).then((message) => {
+            osiris.sendMessage(XSessionToken, Channel, message).then((message) => {
               console.log("[REVOLT]: SENT!");
             });
           });
@@ -598,24 +583,24 @@ Login(email, password)
             const Channel = data.ChannelId;
             const MessageId = data.MessageId;
             const Content = data.Content;
-            var Args = getArgs(Content);
+            var Args = osiris.getArgs(Content);
             var Amount = Args[1];
             if (!Amount) {
-              return SendMessage(
+              return osiris.sendMessage(
                 XSessionToken,
                 Channel,
                 `[REVOLT]: Invalid amount of messages to delete.`,
               );
             }
             if (isNaN(Amount)) {
-              return SendMessage(
+              return osiris.sendMessage(
                 XSessionToken,
                 Channel,
                 `[REVOLT]: Invalid amount of messages to delete.`,
               );
             }
             if (Amount > 100) {
-              return SendMessage(
+              return osiris.sendMessage(
                 XSessionToken,
                 Channel,
                 `[REVOLT]: You can only delete 100 messages at a time.`,
@@ -627,10 +612,10 @@ Login(email, password)
             const Channel = data.ChannelId;
             const MessageId = data.MessageId;
             const Content = data.Content;
-            var Args = getArgs(Content);
+            var Args = osiris.getArgs(Content);
             var Song = Args.slice(1).join(" ");
             if (!Song) {
-              return SendMessage(
+              return osiris.sendMessage(
                 XSessionToken,
                 Channel,
                 `[REVOLT]: Invalid song or no song provided.`,
@@ -647,7 +632,7 @@ Login(email, password)
               .then((response) => {
                 const json = response.data;
                 if (json.error) {
-                  return SendMessage(
+                  return osiris.sendMessage(
                     XSessionToken,
                     Channel,
                     `[REVOLT]: Invalid song or no song provided.`,
@@ -659,7 +644,7 @@ Login(email, password)
                 const SongAlbum = Song.album.name;
                 const SongImage = Song.album.images[0].url;
                 const SongUrl = Song.external_urls.spotify;
-                SendMessage(
+                osiris.sendMessage(
                   XSessionToken,
                   Channel,
                   `[REVOLT]:\n> Song: ${SongName}\n> Artists: ${SongArtists}\n> Album: ${SongAlbum}\n> URL: ${SongUrl}\n> Image: ${SongImage}`,
@@ -677,10 +662,10 @@ Login(email, password)
               const Content = data.Content;
               const Channel = data.ChannelId;
               const MessageId = data.MessageId;
-              var Args = getArgs(Content);
+              var Args = osiris.getArgs(Content);
               var Message = Args.slice(1).join(" ");
               if (!Message) {
-                return SendMessage(
+                return osiris.sendMessage(
                   XSessionToken,
                   Channel,
                   `[REVOLT]: Invalid message or no message provided. Options are: `,
@@ -688,13 +673,13 @@ Login(email, password)
               }
               var EncryptionKey = generateEncryptionKey();
               var EncryptedMessage = encrypt(Message, EncryptionKey);
-              DeleteMessage(XSessionToken, Channel, MessageId);
+              osiris.deleteMessage(XSessionToken, Channel, MessageId);
               console.log(
                 `[REVOLT]: Your decryption or encryption key is ${EncryptionKey.toString(
                   "hex",
                 )}`,
               );
-              SendMessage(
+              osiris.sendMessage(
                 XSessionToken,
                 Channel,
                 `[REVOLT]:\n>Encrypted Message: ${EncryptedMessage}\n>Decryption Key: In your console.`,
@@ -709,18 +694,18 @@ Login(email, password)
               const Content = data.Content;
               const Channel = data.ChannelId;
               const MessageId = data.MessageId;
-              var Args = getArgs(Content);
+              var Args = osiris.getArgs(Content);
               var Message = Args[1];
               var Key = Args.slice(2).join(" ");
               if (!Message) {
-                return SendMessage(
+                return osiris.sendMessage(
                   XSessionToken,
                   Channel,
                   `[REVOLT]: Invalid message or no message provided. Options are: `,
                 );
               }
               if (!Key) {
-                return SendMessage(
+                return osiris.sendMessage(
                   XSessionToken,
                   Channel,
                   `[REVOLT]: Invalid key or no key provided. Options are: buffer of 32 bytes`,
@@ -730,14 +715,14 @@ Login(email, password)
               try {
                 decrypted = decrypt(Message, Buffer.from(Key, "hex"));
               } catch (e) {
-                return SendMessage(
+                return osiris.sendMessage(
                   XSessionToken,
                   Channel,
                   `[REVOLT]: An error occured while decrypting: ${e.code}`,
                 );
               }
-              DeleteMessage(XSessionToken, Channel, MessageId);
-              SendMessage(
+              osiris.deleteMessage(XSessionToken, Channel, MessageId);
+              osiris.sendMessage(
                 XSessionToken,
                 Channel,
                 `[REVOLT]:\n>Encrypted Message: ${Message}\n>Decrypted Message: ${decrypted}`,
@@ -752,7 +737,7 @@ Login(email, password)
               const Content = data.Content;
               const Channel = data.ChannelId;
               const message = `¯I_(ツ)_/¯`;
-              SendMessage(XSessionToken, Channel, message)
+              osiris.sendMessage(XSessionToken, Channel, message)
                 .then((message) => {
                   console.log("[REVOLT]: SENT!");
                 })
@@ -781,7 +766,7 @@ Login(email, password)
                 ░░░░░░░▀▄▄░▒▒▒▒░░░░░░░░░░▒░░░█░
                 ░░░░░░░░░░▀▀▄▄░▒▒▒▒▒▒▒▒▒▒░░░░█░
                 ░░░░░░░░░░░░░░▀▄▄▄▄▄░░░░░░░░█░░`;
-              SendMessage(XSessionToken, Channel, message)
+              osiris.sendMessage(XSessionToken, Channel, message)
                 .then((message) => {
                   console.log("[REVOLT]: SENT!");
                 })
@@ -796,26 +781,26 @@ Login(email, password)
               const Content = data.Content;
               const Channel = data.ChannelId;
               const Server = data?.ServerId;
-              const Args = getArgs(Content);
-              const User = ScanForMentionsAndExtract(Content);
+              const Args = osiris.getArgs(Content);
+              const User = osiris.utils.scanForMentionsAndExtract(Content);
               if (!User) {
-                return SendMessage(
+                return osiris.sendMessage(
                   XSessionToken,
                   Channel,
                   `[REVOLT]: Invalid user or no user provided. Options are: `,
                 );
               }
               if (!Args[2]) {
-                return SendMessage(
+                return osiris.sendMessage(
                   XSessionToken,
                   Channel,
                   `[REVOLT]: Invalid reason or no reason provided. Options are: `,
                 );
               }
               if (Server) {
-                BanUser(XSessionToken, Server, User, Args.slice(1).join(" "))
+                osiris.banUser(XSessionToken, Server, User, Args.slice(1).join(" "))
                   .then((ban) => {
-                    SendMessage(
+                    osiris.sendMessage(
                       XSessionToken,
                       Channel,
                       `Successfully Banned ${autoUser(User)}(${User}) For "${
@@ -842,19 +827,19 @@ Login(email, password)
               const Content = data.Content;
               const Channel = data.ChannelId;
               const Server = data?.ServerId;
-              const Args = getArgs(Content);
-              const User = ScanForMentionsAndExtract(Content);
+              const Args = osiris.getArgs(Content);
+              const User = osiris.utils.scanForMentionsAndExtract(Content);
               if (!User) {
-                return SendMessage(
+                return osiris.sendMessage(
                   XSessionToken,
                   Channel,
                   `[REVOLT]: Invalid user or no user provided. Options are: `,
                 );
               }
               if (Server) {
-                UnBanUser(XSessionToken, Server, User)
+                Unosiris.banUser(XSessionToken, Server, User)
                   .then((ban) => {
-                    SendMessage(
+                    osiris.sendMessage(
                       XSessionToken,
                       Channel,
                       `Successfully UnBanned ${autoUser(User)}(${User}) For "${
@@ -871,7 +856,7 @@ Login(email, password)
                   .catch((ban) => {
                     console.log(ban);
                     console.log("[REVOLT]: Couldnt unban.");
-                    SendMessage(
+                    osiris.sendMessage(
                       XSessionToken,
                       Channel,
                       `[REVOLT]: Couldnt ban.\n>${ban}`,
@@ -886,11 +871,11 @@ Login(email, password)
             return new Promise((resolve, reject) => {
               const Content = data.Content;
               const Channel = data.ChannelId;
-              const Args = getArgs(Content);
-              SendMessage(
+              const Args = osiris.getArgs(Content);
+              osiris.sendMessage(
                 XSessionToken,
                 Channel,
-                `${getArgs[1]}, ${getArgs[2]}`,
+                `${Args[1]}, ${Args[2]}`,
               ).then((message) => {
                 console.log("[REVOLT]: SENT!");
               });
@@ -901,9 +886,9 @@ Login(email, password)
             return new Promise((resolve, reject) => {
               const Content = data.Content;
               const Channel = data.ChannelId;
-              const User = ScanForMentionsAndExtract(Content);
+              const User = osiris.utils.scanForMentionsAndExtract(Content);
               const Gayrate = Math.floor(Math.random() * 101); // should work
-              SendMessage(
+              osiris.sendMessage(
                 XSessionToken,
                 Channel,
                 `${autoUser(User)} is ${Gayrate}% gay!`,
@@ -917,7 +902,7 @@ Login(email, password)
             return new Promise((resolve, reject) => {
               const Content = data.Content;
               const Channel = data.ChannelId;
-              const Args = getArgs(Content);
+              const Args = osiris.getArgs(Content);
               const responses = [
                 "It is certain.",
                 "It is decidedly so.",
@@ -939,7 +924,7 @@ Login(email, password)
                 "My sources say no.",
                 "Very doubtful.",
               ];
-              SendMessage(
+              osiris.sendMessage(
                 XSessionToken,
                 Channel,
                 " `` " +
@@ -957,7 +942,7 @@ Login(email, password)
             return new Promise((resolve, reject) => {
               const Content = data.Content;
               const Channel = data.ChannelId;
-              const Args = getArgs(Content);
+              const Args = osiris.getArgs(Content);
               var types = ["big", "small"];
               const colors = [
                 "red",
@@ -997,14 +982,14 @@ Login(email, password)
                 "darkslategray",
               ];
               if (!Args[1]?.toLowerCase()) {
-                return SendMessage(
+                return osiris.sendMessage(
                   XSessionToken,
                   Channel,
                   `[REVOLT]: Invalid Color or no color provided. Options are: red, green, blue, pink, purple, white, magenta, yellow, orange, brown, crimson, indianred, salmon, lightpink, hotpink, deeppink, orangered, gold, violet, blueviolet, fuchsia, indigo, lime, springgreen, darkgreen, lightgreen, teal, aqua, turquoise, lightskyblue, royalblue, navy, gray, black, darkslategray`,
                 );
               }
               if (!Args[2]?.toLowerCase()) {
-                return SendMessage(
+                return osiris.sendMessage(
                   XSessionToken,
                   Channel,
                   `[REVOLT]: Invalid type or no type provided. Options are: big, small`,
@@ -1014,25 +999,25 @@ Login(email, password)
               var prepare2 = types.find((type) => type.match(Args[2]));
 
               if (!prepare) {
-                return SendMessage(
+                return osiris.sendMessage(
                   XSessionToken,
                   Channel,
                   `[REVOLT]: Invalid Color or no color provided. Options are: red, green, blue, pink, purple, white, magenta, yellow, orange, brown, crimson, indianred, salmon, lightpink, hotpink, deeppink, orangered, gold, violet, blueviolet, fuchsia, indigo, lime, springgreen, darkgreen, lightgreen, teal, aqua, turquoise, lightskyblue, royalblue, navy, gray, black, darkslategray`,
                 );
               } else if (!prepare2) {
-                return SendMessage(
+                return osiris.sendMessage(
                   XSessionToken,
                   Channel,
                   `[REVOLT]: Invalid type or no type provided. Options are: big, small`,
                 );
               } else if (!Args[3]) {
-                return SendMessage(
+                return osiris.sendMessage(
                   XSessionToken,
                   Channel,
                   `[REVOLT]: Invalid messgae or no message provided. Options are: obviously whatever u want.`,
                 );
               }
-              SendMessage(
+              osiris.sendMessage(
                 XSessionToken,
                 Channel,
                 `${Args[2] == "big" ? "#" : ""} $\\color{${
@@ -1058,8 +1043,8 @@ Login(email, password)
                 "8=======D",
                 "8========D",
               ];
-              const User = autoUser(ScanForMentionsAndExtract(Content));
-              SendMessage(
+              const User = autoUser(osiris.utils.scanForMentionsAndExtract(Content));
+              osiris.sendMessage(
                 XSessionToken,
                 Channel,
                 `${User}'s cock is this large: ${
@@ -1083,7 +1068,7 @@ Login(email, password)
                 method: "GET",
                 url: "https://some-random-api.ml/animal/bird",
               }).then((response) => {
-                SendMessage(XSessionToken, Channel, `${response.data.image}`)
+                osiris.sendMessage(XSessionToken, Channel, `${response.data.image}`)
                   .then((message) => {
                     console.log("[REVOLT]: SENT!");
                   })
@@ -1101,7 +1086,7 @@ Login(email, password)
                 method: "GET",
                 url: "https://api.kanye.rest/",
               }).then((response) => {
-                SendMessage(XSessionToken, Channel, `${response.data.quote}`)
+                osiris.sendMessage(XSessionToken, Channel, `${response.data.quote}`)
                   .then((message) => {
                     console.log("[REVOLT]: SENT!");
                   })
@@ -1120,7 +1105,7 @@ Login(email, password)
                 method: "GET",
                 url: "https://api.chucknorris.io/jokes/random",
               }).then((response) => {
-                SendMessage(XSessionToken, Channel, `${response.data.value}`)
+                osiris.sendMessage(XSessionToken, Channel, `${response.data.value}`)
                   .then((message) => {
                     console.log("[REVOLT]: SENT!");
                   })
@@ -1145,7 +1130,7 @@ Login(email, password)
               const Content = data.Content;
               const Channel = data.ChannelId;
               randomAyah().then(() => {
-                SendMessage(
+                osiris.sendMessage(
                   XSessionToken,
                   Channel,
                   `${translatedAyah} (${surahNumber}:${ayahNumber + 1})`,
@@ -1186,7 +1171,7 @@ Login(email, password)
                 method: "GET",
                 url: "https://dog.ceo/api/breeds/image/random",
               }).then((response) => {
-                SendMessage(XSessionToken, Channel, `${response.data.message}`)
+                osiris.sendMessage(XSessionToken, Channel, `${response.data.message}`)
                   .then((message) => {
                     console.log("[REVOLT]: SENT!");
                   })
@@ -1206,7 +1191,7 @@ Login(email, password)
                 url: "https://aws.random.cat/meow",
               })
                 .then((response) => {
-                  SendMessage(XSessionToken, Channel, `${response.data.file}`)
+                  osiris.sendMessage(XSessionToken, Channel, `${response.data.file}`)
                     .then((message) => {
                       console.log("[REVOLT]: SENT!");
                     })
@@ -1224,7 +1209,7 @@ Login(email, password)
             return new Promise((resolve, reject) => {
               const Content = data.Content;
               const Channel = data.ChannelId;
-              const id = getArgs(Content)[1];
+              const id = osiris.getArgs(Content)[1];
               axios({
                 method: "GET",
                 url: `https://users.roblox.com/v1/users/${id}`,
@@ -1246,7 +1231,7 @@ Login(email, password)
                     })
                       .then((resp3) => {
                         let Friends = resp3.data.count;
-                        SendMessage(
+                        osiris.sendMessage(
                           XSessionToken,
                           Channel,
                           markdown(
@@ -1275,9 +1260,9 @@ Login(email, password)
             return new Promise((resolve, reject) => {
               const Content = data.Content;
               const Channel = data.ChannelId;
-              const User = autoUser(ScanForMentionsAndExtract(Content));
+              const User = autoUser(osiris.utils.scanForMentionsAndExtract(Content));
               const IQ = Math.floor(Math.random() * 201);
-              SendMessage(
+              osiris.sendMessage(
                 XSessionToken,
                 Channel,
                 `${User} has an iq of ${IQ}!`,
@@ -1290,7 +1275,7 @@ Login(email, password)
           addCommand("invismsg", (data, sharedObj) => {
             return new Promise((resolve, reject) => {
               const Channel = data.ChannelId;
-              SendMessage(XSessionToken, Channel, `[ ]( )`).then((message) => {
+              osiris.sendMessage(XSessionToken, Channel, `[ ]( )`).then((message) => {
                 console.log("[REVOLT]: SENT!");
               });
             });
@@ -1303,7 +1288,7 @@ Login(email, password)
                 method: "GET",
                 url: "https://would-you-rather-api.abaanshanid.repl.co/",
               }).then((response) => {
-                SendMessage(
+                osiris.sendMessage(
                   XSessionToken,
                   Channel,
                   `${response.data.data}`,
@@ -1317,13 +1302,13 @@ Login(email, password)
           addCommand("ascii", (data, sharedObj) => {
             const Channel = data.ChannelId;
             const Content = data.Content;
-            const Arguments = getArgs(Content);
+            const Arguments = osiris.getArgs(Content);
             const Text = Arguments.slice(1).join(" ");
             figlet.text(Text, function (err, data) {
               if (err) {
                 console.log(`[FIGLET]: ${err}`);
               }
-              SendMessage(XSessionToken, Channel, `${markdown(data)}`).then(
+              osiris.sendMessage(XSessionToken, Channel, `${markdown(data)}`).then(
                 (message) => {
                   console.log("[REVOLT]: SENT!");
                 },
@@ -1333,7 +1318,7 @@ Login(email, password)
 
           addCommand("addy", (data, sharedObj) => {
             const Channel = data.ChannelId;
-            SendMessage(
+            osiris.sendMessage(
               XSessionToken,
               Channel,
               `${faker.address.streetAddress()}`,
@@ -1344,7 +1329,7 @@ Login(email, password)
 
           addCommand("hackerphase", (data, sharedObj) => {
             const Channel = data.ChannelId;
-            SendMessage(
+            osiris.sendMessage(
               XSessionToken,
               Channel,
               `${faker.hacker.phrase()}`,
@@ -1355,7 +1340,7 @@ Login(email, password)
 
           addCommand("email", (data, sharedObj) => {
             const Channel = data.ChannelId;
-            SendMessage(
+            osiris.sendMessage(
               XSessionToken,
               Channel,
               `${faker.internet.email()}`,
@@ -1366,7 +1351,7 @@ Login(email, password)
 
           addCommand("phone", (data, sharedObj) => {
             const Channel = data.ChannelId;
-            SendMessage(
+            osiris.sendMessage(
               XSessionToken,
               Channel,
               `${faker.phone.number("501-###-####")}`,
@@ -1378,7 +1363,7 @@ Login(email, password)
           addCommand("identity", (data, sharedObj) => {
             const Channel = data.ChannelId;
             const Content = data.Content;
-            const Args = getArgs(Content)[1];
+            const Args = osiris.getArgs(Content)[1];
             const Email = faker.internet.email();
             const Name = faker.name.fullName();
             const Address = faker.address.streetAddress();
@@ -1388,7 +1373,7 @@ Login(email, password)
                 method: "GET",
                 url: "https://fakeface.rest/face/json",
               }).then((resp) => {
-                SendMessage(
+                osiris.sendMessage(
                   XSessionToken,
                   Channel,
                   `${markdown(
@@ -1399,7 +1384,7 @@ Login(email, password)
                 });
               });
             } else {
-              SendMessage(
+              osiris.sendMessage(
                 XSessionToken,
                 Channel,
                 `${markdown(
@@ -1415,13 +1400,13 @@ Login(email, password)
             return new Promise((resolve, reject) => {
               const Content = data.Content;
               const Channel = data.ChannelId;
-              const User = autoUser(ScanForMentionsAndExtract(Content));
+              const User = autoUser(osiris.utils.scanForMentionsAndExtract(Content));
               axios({
                 method: "GET",
                 url: "https://nekos.life/api/v2/img/slap",
               })
                 .then((response) => {
-                  SendMessage(
+                  osiris.sendMessage(
                     XSessionToken,
                     Channel,
                     `${response.data.url}\n${User}`,
@@ -1443,13 +1428,13 @@ Login(email, password)
             return new Promise((resolve, reject) => {
               const Content = data.Content;
               const Channel = data.ChannelId;
-              const User = autoUser(ScanForMentionsAndExtract(Content));
+              const User = autoUser(osiris.utils.scanForMentionsAndExtract(Content));
               axios({
                 method: "GET",
                 url: "https://nekos.life/api/v2/img/hug",
               })
                 .then((response) => {
-                  SendMessage(
+                  osiris.sendMessage(
                     XSessionToken,
                     Channel,
                     `${response.data.url}\n${User}`,
@@ -1471,13 +1456,13 @@ Login(email, password)
             return new Promise((resolve, reject) => {
               const Content = data.Content;
               const Channel = data.ChannelId;
-              const User = autoUser(ScanForMentionsAndExtract(Content));
+              const User = autoUser(osiris.utils.scanForMentionsAndExtract(Content));
               axios({
                 method: "GET",
                 url: "https://nekos.life/api/v2/img/kiss",
               })
                 .then((response) => {
-                  SendMessage(
+                  osiris.sendMessage(
                     XSessionToken,
                     Channel,
                     `${response.data.url}\n${User}`,
@@ -1498,7 +1483,7 @@ Login(email, password)
           addCommand("coinflip", (data, sharedObj) => {
             const Channel = data.ChannelId;
             const CF = ["Heads", "Tails"];
-            SendMessage(
+            osiris.sendMessage(
               XSessionToken,
               Channel,
               `${CF[Math.floor(Math.random() * CF.length)]}`,
@@ -1510,13 +1495,13 @@ Login(email, password)
           addCommand("face", (data, sharedObj) => {
             const Channel = data.ChannelId;
             const Content = data.Content;
-            const Args = getArgs(Content)[1];
+            const Args = osiris.getArgs(Content)[1];
             axios({
               method: "GET",
               url: `https://fakeface.rest/face/json?gender=${Args}`,
             })
               .then((resp) => {
-                SendMessage(
+                osiris.sendMessage(
                   XSessionToken,
                   Channel,
                   `${resp.data.image_url}`,
@@ -1539,7 +1524,7 @@ Login(email, password)
                 const Data = resp.data[0];
                 const Quote = Data.quote;
                 const Author = Data.author;
-                SendMessage(
+                osiris.sendMessage(
                   XSessionToken,
                   Channel,
                   `${markdown(`Quote: ${Quote}\nAuthor: ${Author}`)}`,
@@ -1560,7 +1545,7 @@ Login(email, password)
             })
               .then((resp) => {
                 const Data = resp.data.data[0];
-                SendMessage(XSessionToken, Channel, `${Data}`).then(
+                osiris.sendMessage(XSessionToken, Channel, `${Data}`).then(
                   (message) => {
                     console.log("[REVOLT]: SENT!");
                   },
@@ -1579,7 +1564,7 @@ Login(email, password)
             })
               .then((resp) => {
                 const Data = resp.data[0];
-                SendMessage(XSessionToken, Channel, `${Data}`).then(
+                osiris.sendMessage(XSessionToken, Channel, `${Data}`).then(
                   (message) => {
                     console.log("[REVOLT]: SENT!");
                   },
@@ -1598,7 +1583,7 @@ Login(email, password)
             })
               .then((resp) => {
                 const Data = resp.data.image;
-                SendMessage(XSessionToken, Channel, `${Data}`).then(
+                osiris.sendMessage(XSessionToken, Channel, `${Data}`).then(
                   (message) => {
                     console.log("[REVOLT]: SENT!");
                   },
@@ -1617,7 +1602,7 @@ Login(email, password)
             })
               .then((resp) => {
                 const Data = resp.data.quote;
-                SendMessage(XSessionToken, Channel, `${Data}`).then(
+                osiris.sendMessage(XSessionToken, Channel, `${Data}`).then(
                   (message) => {
                     console.log("[REVOLT]: SENT!");
                   },
@@ -1636,7 +1621,7 @@ Login(email, password)
             })
               .then((resp) => {
                 const Data = resp.data.text;
-                SendMessage(XSessionToken, Channel, `${Data}`).then(
+                osiris.sendMessage(XSessionToken, Channel, `${Data}`).then(
                   (message) => {
                     console.log("[REVOLT]: SENT!");
                   },
@@ -1650,17 +1635,17 @@ Login(email, password)
           addCommand("afk", (data, sharedObj) => {
             const Channel = data.ChannelId;
             const Content = data.Content;
-            const Args = getArgs(data.Content)[1];
+            const Args = osiris.getArgs(data.Content)[1];
             switch (Args) {
               case "on":
-                SendMessage(XSessionToken, Channel, `Now AFK!`).then(
+                osiris.sendMessage(XSessionToken, Channel, `Now AFK!`).then(
                   (message) => {
                     console.log("[REVOLT]: NOW AFK");
                   },
                 );
                 break;
               default:
-                SendMessage(XSessionToken, Channel, `No longer AFK!`).then(
+                osiris.sendMessage(XSessionToken, Channel, `No longer AFK!`).then(
                   (message) => {
                     console.log("[REVOLT]: NO LONGER AFK");
                   },
@@ -1676,7 +1661,7 @@ Login(email, password)
               url: "https://api.capy.lol/v1/capybara?json=true",
             }).then((resp) => {
               let image = resp.data.data.url;
-              SendMessage(XSessionToken, Channel, image)
+              osiris.sendMessage(XSessionToken, Channel, image)
                 .then((message) => {
                   console.log("[REVOLT]: SENT!");
                 })
@@ -1693,7 +1678,7 @@ Login(email, password)
               url: "https://api.capy.lol/v1/capyoftheday?json=true",
             }).then((resp) => {
               let image = resp.data.data.url;
-              SendMessage(XSessionToken, Channel, image)
+              osiris.sendMessage(XSessionToken, Channel, image)
                 .then((message) => {
                   console.log("[REVOLT]: SENT!");
                 })
@@ -1709,7 +1694,7 @@ Login(email, password)
               url: "https://api.capy.lol/v1/fact",
             }).then((resp) => {
               let image = resp.data.data.fact;
-              SendMessage(XSessionToken, Channel, image)
+              osiris.sendMessage(XSessionToken, Channel, image)
                 .then((message) => {
                   console.log("[REVOLT]: SENT!");
                 })
@@ -1734,9 +1719,9 @@ Login(email, password)
             Message.author !== "00000000000000000000000000"
           ) {
             try {
-              FetchUser(XSessionToken, Message.author).then((user) => {
+              osiris.fetchUser(XSessionToken, Message.author).then((user) => {
                 Users[Message.author] = { Username: user.UserName };
-                FetchChannel(XSessionToken, Message.channel).then((channel) => {
+                osiris.fetchChannel(XSessionToken, Message.channel).then((channel) => {
                   const ChannelName = channel.ChannelName;
                   console.log(
                     `\x1b[36m[REVOLT]\x1b[0m: Author \x1b[33m${
@@ -1748,65 +1733,14 @@ Login(email, password)
                     }\x1b[0m' in \x1b[34m${ChannelName}\x1b[0m!`,
                   );
                 });
-
-                FetchChannel(XSessionToken, Message.channel).then((channel) => {
-                  if (channel.ServerId) {
-                    if (Message.content?.startsWith(prefix)) {
-                      handleCommand(Message.content, {
-                        Context: "Server",
-                        Author: Message.author,
-                        ChannelId: Message.channel,
-                        Content: Message.content,
-                        ServerId: channel.ServerId,
-                        MessageId: Message._id,
-                      });
-                    }
-                  } else {
-                    if (Message.content?.startsWith(prefix)) {
-                      handleCommand(Message.content, {
-                        Context: "Message",
-                        Author: Message.author,
-                        ChannelId: Message.channel,
-                        Content: Message.content,
-                        MessageId: Message._id,
-                      });
-                    }
-                  }
-                });
               });
             } catch (err) {
               console.log(err);
             }
           } else {
             try {
-              FetchChannel(XSessionToken, Message.channel).then((channel) => {
-                if (channel.ServerId) {
-                  if (Message.content?.startsWith(prefix)) {
-                    handleCommand(Message.content, {
-                      Context: "Server",
-                      Author: Message.author,
-                      ChannelId: Message.channel,
-                      Content: Message.content,
-                      ServerId: channel.ServerId,
-                      MessageId: Message._id,
-                    });
-                    DeleteMessage(XSessionToken, Message.channel, Message._id);
-                  }
-                } else {
-                  if (Message.content?.startsWith(prefix)) {
-                    handleCommand(Message.content, {
-                      Context: "Message",
-                      Author: Message.author,
-                      ChannelId: Message.channel,
-                      Content: Message.content,
-                      MessageId: Message._id,
-                    });
-                    DeleteMessage(XSessionToken, Message.channel, Message._id);
-                  }
-                }
-              });
               //-- Ping loggin' lol
-              //let PingedUser = ScanForMentionsAndExtract(Message.content)
+              //let PingedUser = osiris.utils.scanForMentionsAndExtract(Message.content)
               if (false) {
                 console.log(
                   `[REVOLT]: Author ${
@@ -1818,7 +1752,7 @@ Login(email, password)
                   }!`,
                 );
               } else {
-                FetchChannel(XSessionToken, Message.channel).then((channel) => {
+                osiris.fetchChannel(XSessionToken, Message.channel).then((channel) => {
                   const ChannelName = channel.ChannelName;
                   console.log(
                     `\x1b[36m[REVOLT]\x1b[0m: Author \x1b[33m${
@@ -1836,10 +1770,53 @@ Login(email, password)
             }
           }
 
+
+          // Handle self messages
+
+          if (Message.author === UserId) {
+
+            //console.log(`[REVOLT]: Received self message`);
+
+            osiris.fetchChannel(XSessionToken, Message.channel).then((channel) => {
+              if (channel.ServerId) {
+                if (Message.content?.startsWith(prefix)) {
+                  handleCommand(Message.content, {
+                    Context: "Server",
+                    Author: Message.author,
+                    ChannelId: Message.channel,
+                    Content: Message.content,
+                    ServerId: channel.ServerId,
+                    MessageId: Message._id,
+                  });
+                  osiris.deleteMessage(XSessionToken, Message.channel, Message._id);
+                }
+              } else {
+                if (Message.content?.startsWith(prefix)) {
+                  handleCommand(Message.content, {
+                    Context: "Message",
+                    Author: Message.author,
+                    ChannelId: Message.channel,
+                    Content: Message.content,
+                    MessageId: Message._id,
+                  });
+                  osiris.deleteMessage(XSessionToken, Message.channel, Message._id);
+                }
+              }
+            });
+
+
+
+          }
+
+
+
+
+
+
           break;
 
         case "MessageUpdate":
-          FetchChannel(XSessionToken, Message.channel).then((channel) => {
+          osiris.fetchChannel(XSessionToken, Message.channel).then((channel) => {
             const ChannelName = channel.ChannelName;
             console.log(
               `\x1b[36m[REVOLT]\x1b[0m: Author \x1b[33m${

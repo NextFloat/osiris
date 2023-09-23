@@ -5,7 +5,7 @@
  * @returns {Object} User information.
  */
 
-const { generateNonce } = require("../api/extra/generateNonce.js");
+const { generateNonce } = require("./utils/generateNonce.js");
 const axios = require("axios");
 const ulid = require("ulid");
 function FetchUser(SessionToken, UserId) {
