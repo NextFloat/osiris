@@ -3,7 +3,7 @@
  * - description: A simple ping command :)
  */
 
-const { SendMessage } = require("../api/sendMessage.js");
+const { SendMessage } = require("../../api/sendMessage.js");
 
 console.log(SendMessage);
 function execute(XSessionToken, data, sharedObj) {
