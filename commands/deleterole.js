@@ -1,37 +1,37 @@
 /**
  * - author: g0dswisdom
- * - description: A command that creates a role with the given name
+ * - description: A command that deletes a role
  */
 
 const { SendMessage } = require("../api/sendMessage.js");
 const { getArgs } = require("../api/extra/getArgs.js");
-const { CreateRole } = require("../api/createRole.js");
+const { DeleteRole } = require("../api/deleteRole.js");
 
 function execute(XSessionToken, data, sharedObj) {
     const Channel = data.ChannelId;
     const Content = data.Content;
     const Server = data?.ServerId;
     const Args = getArgs(Content);
-    const RoleName = Args[1];
+    const RoleId = Args[1];
 
-    if (!RoleName) {
-        return SendMessage(XSessionToken, Channel, "[REVOLT]: No name given!")
+    if (!RoleId) {
+        return SendMessage(XSessionToken, Channel, "[REVOLT]: No id given!")
     }
     
-    CreateRole(XSessionToken, Server, RoleName, Channel).catch((err) => { // we're including channel so the sendmessage func works.. not actually needed
+    DeleteRole(XSessionToken, Server, RoleId, Channel).catch((err) => { // we're including channel so the sendmessage func works.. not actually needed
         return console.log(err); // we need to catch too
     })
 }
 
 module.exports = {
-    name: "createrole",
-    description: "Creates a role with the given name",
+    name: "deleterole",
+    description: "Deletes a role with the id of it",
     native: true,
     category: "admin",
-    usage: "createrole",
+    usage: "deleterole",
     arguments: [
         {
-            name: "name",
+            name: "id",
             type: "STRING"
         }
     ],  
