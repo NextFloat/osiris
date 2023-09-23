@@ -13,6 +13,10 @@ const { Login } = require ('./login.js');
 const { SendMessage } = require ('./sendMessage.js');
 const { setStatus } = require ('./setStatus.js');
 const { UnBanUser } = require ('./unbanUser.js');
+const { CreateInvite } = require ('./createInvite.js');
+const { CreateServer } = require ('./createServer.js');
+const { DeleteRole } = require ('./deleteRole.js');
+const { LeaveServer } = require ('./leaveServer.js');
 
 // Extra functions
 const { generateNonce } = require ('./utils/generateNonce.js');
@@ -46,6 +50,14 @@ osiris.sendMessage = SendMessage;
 osiris.setStatus = setStatus;
 
 osiris.unbanUser = UnBanUser;
+
+osiris.createInvite = CreateInvite;
+
+osiris.createServer = CreateServer;
+
+osiris.deleteRole = DeleteRole;
+
+osiris.leaveServer = LeaveServer;
 
 // utils
 
