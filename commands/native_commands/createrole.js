@@ -3,7 +3,9 @@
  * - description: A command that kicks the user
  */
 
+
 const { osiris } = require ("../../api/osiris.js");
+
 
 function execute(XSessionToken, data, sharedObj) {
     const Channel = data.ChannelId;
