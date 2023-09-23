@@ -31,28 +31,33 @@ function importCommands() {
   const commands = {};
   const commandsPath = path.join(__dirname, "commands");
 
-  // Read all files in the commands folder
-  const commandFiles = fs.readdirSync(commandsPath);
-
-  // Import each command file dynamically
-  for (const file of commandFiles) {
-    const filePath = path.join(commandsPath, file);
-    console.log(filePath);
-    // Add require to commands list
-    let _command = require(filePath);
-    commands[_command.name] = {
-      execute: _command.execute,
-      description: _command.description,
-      category: _command.category,
-      native: _command.native,
-      usage: _command.usage,
-      args: _command.arguments,
-    };
+  // Recursively search for command files in the commands folder and its subfolders
+  function searchForCommandFiles(folderPath) {
+    const files = fs.readdirSync(folderPath);
+    for (const file of files) {
+      const filePath = path.join(folderPath, file);
+      if (fs.statSync(filePath).isDirectory()) {
+        searchForCommandFiles(filePath);
+      } else if (file.endsWith(".js")) {
+        const _command = require(filePath);
+        commands[_command.name] = {
+          execute: _command.execute,
+          description: _command.description,
+          category: _command.category,
+          native: _command.native,
+          usage: _command.usage,
+          args: _command.arguments,
+        };
+      }
+    }
   }
+
+  searchForCommandFiles(commandsPath);
 
   // Access the registered commands from osiris.commands
   return commands;
 }
+
 
 // Register a command
 function registerCommand(command) {

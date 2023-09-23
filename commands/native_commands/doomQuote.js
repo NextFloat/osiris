@@ -1,4 +1,4 @@
-const { SendMessage } = require("../api/sendMessage.js");
+const { SendMessage } = require("../../api/sendMessage.js");
 function execute(XSessionToken, data, sharedObj) {
   const Channel = data.ChannelId;
 
