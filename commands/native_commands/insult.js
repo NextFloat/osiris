@@ -1,7 +1,7 @@
-const { SendMessage } = require("../api/sendMessage.js");
+const { SendMessage } = require("../../api/sendMessage.js");
 const {
   ScanForMentionsAndExtract,
-} = require("../api/extra/scanForMentionsAndExtract.js");
+} = require("../../api/extra/scanForMentionsAndExtract.js");
 
 const insults = [
   " is as monstrous as a sickening goatish puddle of wicked bug balls",
