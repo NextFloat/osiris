@@ -3,12 +3,12 @@
  * - description: A simple ping command :)
  */
 
-const { SendMessage } = require("../../api/sendMessage.js");
+const { osiris } = require ("../../api/osiris.js");
 
-console.log(SendMessage);
+
 function execute(XSessionToken, data, sharedObj) {
   const Channel = data.ChannelId;
-  SendMessage(XSessionToken, Channel, `pong!`).then((message) => {
+  osiris.sendMessage(XSessionToken, Channel, `pong!`).then((message) => {
     console.log("[REVOLT]: SENT 'PONG'!");
   });
 }

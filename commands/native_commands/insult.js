@@ -1,7 +1,4 @@
-const { SendMessage } = require("../../api/sendMessage.js");
-const {
-  ScanForMentionsAndExtract,
-} = require("../../api/extra/scanForMentionsAndExtract.js");
+const { osiris } = require ("../../api/osiris.js");
 
 const insults = [
   " is as monstrous as a sickening goatish puddle of wicked bug balls",
@@ -108,9 +105,9 @@ const insults = [
 
 function execute(XSessionToken, data, sharedObj) {
   const Content = data.Content;
-  const User = ScanForMentionsAndExtract(Content);
+  const User = osiris.utils.scanForMentionsAndExtract(Content);
   const Channel = data.ChannelId;
-  SendMessage(
+  osiris.sendMessage(
     XSessionToken,
     Channel,
     `<@${User}> ${insults[Math.floor(Math.random() * insults.length)]}`,

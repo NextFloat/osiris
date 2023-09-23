@@ -3,19 +3,21 @@
  * - description: A simple ping command :)
  */
 
-const { osirisAPI } = require ("../../api/osirisAPI.js");
+const { osiris } = require ("../../api/osiris.js");
 
-console.log(osirisAPI);
+console.log(osiris);
 
 function execute(XSessionToken, data, sharedObj) {
   const Channel = data.ChannelId;
   const Message = data.Content;
 
-  const Arguments = Message.split(" ");
+  const Arguments = osiris.utils.getArgs(Message);
+
+  
 
 
-  console.log(osirisAPI);
-  osirisAPI.sendMessage(XSessionToken, Channel, `${Arguments[1]}`).then((message) => {
+  console.log(osiris);
+  osiris.sendMessage(XSessionToken, Channel, `${Arguments[1]}`).then((message) => {
     console.log("[REVOLT]: SENT 'PONG'!");
   });
 }
