@@ -2,7 +2,6 @@
  * - author: g0dswisdom
  * - description: A command that kicks the user
  */
-
 const { SendMessage } = require("../../api/sendMessage.js");
 const { getArgs } = require("../../api/extra/getArgs.js");
 const { CreateRole } = require("../../api/createRole.js");
