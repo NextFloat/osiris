@@ -1,22 +1,19 @@
-# Osiris
+# 🌐 Osiris
 
 Osiris is a selfbot for revolt.chat, built using Node.js and websockets.
+
 Osiris was made to enhance the user experience on revolt.chat!
 
-## Features
+## 📜 Features
 
-- Message Encryption!
-- Commands!
+- You can make your own custom commands!
+- Lots of fun commands!
 
-## Demo
-
-- [Streamable](https://streamable.com/h2s5ty)
-
-## Documentation
+## 🤖 Documentation
 
 For troubleshooting, installation and creating custom commands, check out the documentation:
-\n
-https://osiris-4.gitbook.io/osiris-documentation/
+
+- [Documentation](https://osiris-4.gitbook.io/osiris-documentation/)
 
 # Authors
 
@@ -24,3 +21,6 @@ https://osiris-4.gitbook.io/osiris-documentation/
 - [@g0dswisdom](https://github.com/g0dswisdom)
 - [@ananymoos](https://github.com/ananymoos1)
 - [@9xCatto](https://github.com/9xCatto)
+
+# ❗ NOTE
+The creators of Osiris are **NOT** responsible for anything you do with the product we made for educational purposes.
