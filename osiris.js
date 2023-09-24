@@ -7,57 +7,43 @@ const { faker } = require("@faker-js/faker");
 const figlet = require("figlet");
 const { platform } = require("node:process");
 const nodeBashTitle = require("node-bash-title"); // npm install node-bash-title --save
-
+const { exec } = require('child_process');    
 // Require custom revolt API functions
 const { osiris } = require("./api/osiris.js");
 
 const fs = require("fs");
 const path = require("path");
 
-// Define the GitHub repository owner and name
-const owner = 'Rumodeus';
-const repoName = 'osiris';
-
 // Get the current directory where the script is located
 const localDirectory = __dirname;
 
-// Define the names of folders you want to exclude
-const excludedFolders = ['.git', 'node_modules', 'commands'];
-
-// Function to check if there are remote changes
+// Function to check if there are remote changes using git fetch --dry-run
 function areRemoteChanges() {
-  try {
+  return new Promise((resolve, reject) => {
     // Use Git fetch --dry-run to check for remote changes
-    const gitFetchOutput = execSync('git fetch --dry-run', {
-      cwd: localDirectory,
-      encoding: 'utf-8',
+    const command = 'git fetch --dry-run';
+
+    exec(command, { cwd: localDirectory, encoding: 'utf-8' }, (error, stdout, stderr) => {
+      if (error) {
+        console.error(`Error checking for remote changes: ${error.message}`);
+        resolve(false); // Handle errors by assuming no changes
+      } else {
+        // Check if the output contains the string "new commits" to detect remote changes
+        resolve(stdout.trim() !== '');
+      }
     });
-
-    // If there are remote changes, the output will not be empty
-    return gitFetchOutput.trim() !== '';
-  } catch (error) {
-    // Handle errors (e.g., Git command fails)
-    console.error('Error checking for remote changes: ${error.message}');
-    return false;
-  }
-}
-
-// Function to check if a directory should be excluded
-function shouldExcludeDirectory(directoryName) {
-  return excludedFolders.includes(directoryName);
+  });
 }
 
 // Function to check if local files are outdated compared to the remote GitHub repo
-function checkRepoStatus() {
-  if (areRemoteChanges()) {
+async function checkRepoStatus() {
+  const remoteChanges = await areRemoteChanges();
+  if (remoteChanges) {
     console.log('There are remote changes. Some files may be outdated.');
   } else {
     console.log('No remote changes. All files are up to date.');
   }
 }
-
-// Start checking for remote changes
-checkRepoStatus();
 
 // Function to import all commands from the commands folder
 function importCommands() {
@@ -519,6 +505,7 @@ osiris.login(email, password)
             }
           }
           console.log("[REVOLT]: Fetched ?????");
+          checkRepoStatus();
           setInterval(() => {
             var TimeStamp = new Date().getTime();
             ws.send(
@@ -1877,7 +1864,7 @@ osiris.login(email, password)
         case "Pong":
           console.log(`[REVOLT]: Received heartbeat back`);
           break;
-
+            
         case "Authenticated":
           console.log(`[REVOLT]: Authenticated!`);
           break;
@@ -1890,5 +1877,7 @@ osiris.login(email, password)
   })
   .catch((oopsies) => {
     console.error(oopsies);
+    checkRepoStatus();
     throw new Error(`[REVOLT]: Couldnt login. Additional information`);
   }); //First start off by logging in your acc with email and password. Captchas should be absent.
+
