@@ -1,4 +1,3 @@
-// test
 const WebSocket = require("ws");
 const axios = require("axios");
 const ulid = require("ulid");
@@ -14,6 +13,89 @@ const { osiris } = require("./api/osiris.js");
 
 const fs = require("fs");
 const path = require("path");
+
+
+// Define the GitHub repository owner and name
+const owner = 'Rumodeus';
+const repoName = 'osiris';
+
+// Get the current directory where the script is located
+const localDirectory = __dirname;
+
+// Define the names of folders you want to exclude
+const excludedFolders = ['.git', 'node_modules', 'commands'];
+
+// Function to check if a file is outdated compared to the Git repo
+function isFileOutdated(filePath) {
+  try {
+    // Use Git status to check if the file has been modified
+    const gitStatusOutput = execSync(`git status --porcelain -- ${filePath}`, {
+      cwd: localDirectory,
+      encoding: 'utf-8',
+    });
+
+    // If the file is modified, it's considered outdated
+    if (gitStatusOutput.trim() !== '') {
+      return true; // The file is outdated
+    }
+  } catch (error) {
+    // Handle errors (e.g., file not found or Git command fails)
+    console.error(`Error checking file ${filePath}: ${error.message}`);
+  }
+  return false; // The file is up to date or an error occurred
+}
+
+// Function to check if a directory should be excluded
+function shouldExcludeDirectory(directoryName) {
+  return excludedFolders.includes(directoryName);
+}
+
+// Function to fetch the latest commit hash of the remote GitHub repository
+async function getLatestCommitHash() {
+  try {
+    const apiUrl = `https://api.github.com/repos/${owner}/${repoName}/commits/master`;
+    const response = await axios.get(apiUrl); // Use axios to make the request
+
+    if (response.status === 200) {
+      return response.data.sha;
+    } else {
+      throw new Error(`Failed to fetch commit information. Status code: ${response.status}`);
+    }
+  } catch (error) {
+    console.error(`Error fetching commit information: ${error.message}`);
+    return null;
+  }
+}
+
+// Function to check if local files are outdated compared to the remote GitHub repo
+async function checkRepoStatus() {
+  const latestCommitHash = await getLatestCommitHash();
+  if (!latestCommitHash) {
+    return;
+  }
+
+  const files = fs.readdirSync(localDirectory);
+
+  for (const file of files) {
+    const filePath = path.join(localDirectory, file);
+
+    if (fs.statSync(filePath).isDirectory()) {
+      // If it's a directory, check if it should be excluded
+      if (!shouldExcludeDirectory(file)) {
+        // Check its files recursively
+        checkFilesInDirectory(filePath);
+      }
+    } else if (!excludedFolders.some(folder => filePath.includes(folder)) && isFileOutdated(filePath)) {
+      console.log(`File ${filePath} is outdated.`);
+    }
+      else {
+        console.log('In date')
+    }
+  }
+}
+
+// Start checking files in the local directory
+checkRepoStatus();
 
 // Function to import all commands from the commands folder
 function importCommands() {
