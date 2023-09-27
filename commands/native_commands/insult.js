@@ -107,13 +107,19 @@ function execute(XSessionToken, data, sharedObj) {
   const Content = data.Content;
   const User = osiris.utils.scanForMentionsAndExtract(Content);
   const Channel = data.ChannelId;
+  osiris.embed(XSessionToken, Channel, "", {
+    EmbedTitle: "osiris",
+    EmbedDescription: `<@${User}> ${insults[Math.floor(Math.random() * insults.length)]}`,
+    EmbedColour: "#a81808"
+  }).then((msg) => console.log("[REVOLT]: SENT")).catch((err) => console.log(err));
+  /*
   osiris.sendMessage(
     XSessionToken,
     Channel,
     `<@${User}> ${insults[Math.floor(Math.random() * insults.length)]}`,
   ).then((message) => {
     console.log("[REVOLT]: SENT!");
-  });
+  });*/
 }
 
 module.exports = {

@@ -4,11 +4,15 @@
     "axios": "^1.5.0",
     "crypto": "^1.0.1",
     "figlet": "^1.6.0",
+    "jquery": "^3.7.1",
     "node-bash-title": "^0.0.2",
     "ulid": "^2.3.0",
     "ws": "^8.14.2"
   },
   "devDependencies": {
     "prettier": "3.0.3"
+  },
+  "scripts": {
+    "start": "electron ./electron"
   }
 }

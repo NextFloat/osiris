@@ -2,7 +2,7 @@ const WebSocket = require("ws");
 const axios = require("axios");
 const ulid = require("ulid");
 const crypto = require("crypto");
-const { email, password, prefix, autodelete } = require("./config.json");
+const { email, password, prefix, autodelete, electron_ui } = require("./config.json");
 const { faker } = require("@faker-js/faker");
 const figlet = require("figlet");
 const { platform } = require("node:process");
@@ -10,6 +10,8 @@ const nodeBashTitle = require("node-bash-title"); // npm install node-bash-title
 const { exec } = require('child_process');    
 // Require custom revolt API functions
 const { osiris } = require("./api/osiris.js");
+
+
 
 const fs = require("fs");
 const path = require("path");
@@ -1880,4 +1882,3 @@ osiris.login(email, password)
     checkRepoStatus();
     throw new Error(`[REVOLT]: Couldnt login. Additional information`);
   }); //First start off by logging in your acc with email and password. Captchas should be absent.
-
