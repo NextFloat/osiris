@@ -17,9 +17,12 @@ function execute(XSessionToken, data, sharedObj) {
     
     osiris.kickUser(XSessionToken, Server, User);
     
-    osiris.sendMessage(XSessionToken, Channel, `Successfully kicked <@${User}>`).then((message) => {
-        console.log("[REVOLT]: KICKED USER!");
-    })
+    osiris.embed(XSessionToken, Channel, "", {
+        EmbedTitle: "osiris",
+        EmbedDescription: `Successfully kicked <@${User}>`,
+        EmbedColour: "#a81808"
+    }).then((msg) => console.log("[REVOLT]: SENT")).catch((err) => console.log(err));
+
 }
 
 module.exports = {

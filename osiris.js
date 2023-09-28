@@ -1880,4 +1880,3 @@ osiris.login(email, password)
     checkRepoStatus();
     throw new Error(`[REVOLT]: Couldnt login. Additional information`);
   }); //First start off by logging in your acc with email and password. Captchas should be absent.
-

@@ -8,9 +8,11 @@ const { osiris } = require ("../../api/osiris.js");
 
 function execute(XSessionToken, data, sharedObj) {
   const Channel = data.ChannelId;
-  osiris.sendMessage(XSessionToken, Channel, `pong!`).then((message) => {
-    console.log("[REVOLT]: SENT 'PONG'!");
-  });
+  osiris.embed(XSessionToken, Channel, "", {
+    EmbedTitle: "osiris",
+    EmbedDescription: `Pong! :ping_pong:`,
+    EmbedColour: "#a81808"
+}).then((msg) => console.log("[REVOLT]: SENT")).catch((err) => console.log(err));
 }
 
 module.exports = {

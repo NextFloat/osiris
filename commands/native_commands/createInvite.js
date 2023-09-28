@@ -9,7 +9,9 @@ function execute(XSessionToken, data, sharedObj) {
     const Channel = data.ChannelId;
     const Content = data.Content;
 
-    osiris.createInvite(XSessionToken, Channel).catch((err) => console.log(err));
+    osiris.createInvite(XSessionToken, Channel).then((msg) => {
+        console.log("[REVOLT]: CREATED INVITE!")
+    }).catch((err) => console.log(err));
 }
 
 module.exports = {
