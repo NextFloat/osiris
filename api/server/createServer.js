@@ -1,20 +1,25 @@
 /**
- * This function creates an invite
+ * This function creates a server
  * @param {string} SessionToken - The session token retrieved from the Login() function.
- * @param {string} RoleId - The role's id
- * @param {string} Channel - The channel to create an invite for
+ * @param {string} Name - The server's name
+ * @param {string} Description - The server's description
+ * @param {boolean} NSFWState - true/false
  */
 
 const axios = require("axios");
 const ulid = require("ulid");
-const { SendMessage } = require("./sendMessage");
+const { SendMessage } = require("../user/sendMessage");
 
-function CreateInvite(SessionToken, Channel) {
+function CreateServer(SessionToken, Name, Description, NSFWState) {
   return new Promise((resolve, reject) => {
     axios({
       method: "POST",
-      url: `https://api.revolt.chat/channels/${Channel}/invites`,
-      data: { },
+      url: `https://api.revolt.chat/servers/create`,
+      data: { 
+        name: Name,
+        description: Description,
+        nsfw: NSFWState
+      },
       headers: {
         Host: "api.revolt.chat",
         Connection: "keep-alive",
@@ -35,10 +40,7 @@ function CreateInvite(SessionToken, Channel) {
       Referer: "https://app.revolt.chat/",
     })
       .then((response) => {
-        console.log("[REVOLT]: CREATED INVITE")
-        SendMessage(SessionToken, Channel, `Successfully created invite! https://rvlt.gg/${response.data._id}`).then((message) => {
-            console.log("[REVOLT]: SENT!");
-        })
+        console.log("[REVOLT]: CREATED SERVER")
       })
       .catch((response) => {
         console.log(response);
@@ -47,4 +49,4 @@ function CreateInvite(SessionToken, Channel) {
   });
 }
 
-module.exports = { CreateInvite };
+module.exports = { CreateServer };

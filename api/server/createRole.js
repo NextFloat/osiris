@@ -8,7 +8,7 @@
 
 const axios = require("axios");
 const ulid = require("ulid");
-const { SendMessage } = require("./sendMessage");
+const { SendMessage } = require("../user/sendMessage");
 
 function CreateRole(SessionToken, Server, Name, Channel) {
   return new Promise((resolve, reject) => {

@@ -12,13 +12,17 @@ function execute(XSessionToken, data, sharedObj) {
     var Args = osiris.utils.getArgs(Content);
     if (Args[1]) {
         nodeBashTitle(Args[1]);
-        osiris.sendMessage(XSessionToken, Channel, `Changed console name to ${Args[1]}`).then((message) => {
-            console.log("[REVOLT]: SENT!");
-        })
+        osiris.embed(XSessionToken, Channel, "", {
+            EmbedTitle: "osiris",
+            EmbedDescription: `changed console name to ${Args[1]}`,
+            EmbedColour: "#a81808"
+        }).then((msg) => console.log("[REVOLT]: SENT")).catch((err) => console.log(err));
     } else {
-        osiris.sendMessage(XSessionToken, Channel, "No argument for title").then((message) => {
-            console.log("[REVOLT]: SENT!");
-        })
+        osiris.embed(XSessionToken, Channel, "", {
+            EmbedTitle: "osiris",
+            EmbedDescription: `no first argument :(`,
+            EmbedColour: "#a81808"
+        }).then((msg) => console.log("[REVOLT]: SENT")).catch((err) => console.log(err));
     }
     //(XSessionToken, Channel, )
 }

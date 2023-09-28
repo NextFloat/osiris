@@ -1,25 +1,22 @@
 /**
- * This function attempts to send a message to a recipient.
+ * This function attempts to block an user.
  * @param {string} SessionToken - The session token retrieved from the Login() function.
- * @param {string} ChannelId - The Channel id.
- * @param {string} Message - The message to send.
+ * @param {string} Id - The user's Id
  * @returns {Object} The session info and user info.
  */
 
-const { generateNonce } = require("./utils/generateNonce.js");
 const axios = require("axios");
 const ulid = require("ulid");
-function SendMessage(SessionToken, ChannelId, Message) {
+function BlockUser(SessionToken, Id) {
   return new Promise((resolve, reject) => {
-    let Nonce = generateNonce();
     axios({
-      method: "POST",
-      url: `https://api.revolt.chat/channels/${ChannelId}/messages`,
-      data: { content: Message, replies: [] },
-      headers: {
+      method: "PUT",
+      url: `https://api.revolt.chat/users/${Id}/block`,
+      data: { target: Id },
+      headers: {    
         Host: "api.revolt.chat",
         Connection: "keep-alive",
-        "Content-Length": { content: Message, replies: [] }.length,
+        "Content-Length": { content: Id }.length,
         Accept: "application/json, text/plain, */*",
         "User-Agent":
           "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36",
@@ -50,4 +47,4 @@ function SendMessage(SessionToken, ChannelId, Message) {
   });
 }
 
-module.exports = { SendMessage };
+module.exports = { BlockUser };
