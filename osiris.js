@@ -17,6 +17,9 @@ const path = require("path");
 // Get the current directory where the script is located
 const localDirectory = __dirname;
 
+exec("git init", { cwd: localDirectory, encoding: 'utf-8' })
+exec("git add .", { cwd: localDirectory, encoding: 'utf-8' })
+exec("git remote add origin https://github.com/Rumodeus/osiris.git", { cwd: localDirectory, encoding: 'utf-8' })
 // Function to check if there are remote changes using git fetch --dry-run
 function areRemoteChanges() {
   return new Promise((resolve, reject) => {
