@@ -19,7 +19,7 @@ if (!fs.existsSync(localDirectory + '\\.git')) {
   console.log("working")
   exec('git init', { cwd: localDirectory, encoding: 'utf-8' })
   exec('git add .', { cwd: localDirectory, encoding: 'utf-8' })
-  exec('git remote add origin https://github.com/Rumodeus/osiris', { cwd: localDirectory, encoding: 'utf-8' })
+  exec('git remote add origin https://github.com/DisECtRy/osiris', { cwd: localDirectory, encoding: 'utf-8' })
 }
 // Function to check if there are remote changes using git fetch --dry-run
 function areRemoteChanges() {
