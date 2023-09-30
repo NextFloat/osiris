@@ -10,34 +10,44 @@ const nodeBashTitle = require("node-bash-title"); // npm install node-bash-title
 const { exec } = require('child_process');    
 // Require custom revolt API functions
 const { osiris } = require("./api/osiris.js");
-//
 const fs = require("fs");
 const path = require("path");
 
 // Get the current directory where the script is located
-const localDirectory = __dirname;
-
-exec("git init", { cwd: localDirectory, encoding: 'utf-8' })
-exec("git add .", { cwd: localDirectory, encoding: 'utf-8' })
-exec("git remote add origin https://github.com/Rumodeus/osiris.git", { cwd: localDirectory, encoding: 'utf-8' })
+const localDirectory = process.cwd();
+if (!fs.existsSync(localDirectory + '\\.git')) {
+  console.log("working")
+  exec('git init', { cwd: localDirectory, encoding: 'utf-8' })
+  exec('git add .', { cwd: localDirectory, encoding: 'utf-8' })
+  exec('git remote add origin https://github.com/Rumodeus/osiris', { cwd: localDirectory, encoding: 'utf-8' })
+}
 // Function to check if there are remote changes using git fetch --dry-run
 function areRemoteChanges() {
   return new Promise((resolve, reject) => {
     // Use Git fetch --dry-run to check for remote changes
     const command = 'git fetch --dry-run';
-
+    //idk why but it doesnt work without stdout in second pos, probaby prints output to the third argument
     exec(command, { cwd: localDirectory, encoding: 'utf-8' }, (error, stdout, stderr) => {
       if (error) {
         console.error(`Error checking for remote changes: ${error.message}`);
         resolve(false); // Handle errors by assuming no changes
       } else {
-        // Check if the output contains the string "new commits" to detect remote changes
-        resolve(stdout.trim() !== '');
+        // Check if the output is empty to detect if there are no changes
+        resolve(stderr.trim() !== '');
       }
     });
   });
 }
 
+// Function to check if local files are outdated compared to the remote GitHub repo
+async function checkRepoStatus() {
+  const remoteChanges = await areRemoteChanges();
+  if (remoteChanges) {
+    console.log('There are remote changes. Some files may be outdated.');
+  } else {
+    console.log('No remote changes. All files are up to date.');
+  }
+}
 // Function to check if local files are outdated compared to the remote GitHub repo
 async function checkRepoStatus() {
   const remoteChanges = await areRemoteChanges();
