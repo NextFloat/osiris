@@ -3,7 +3,7 @@
 Osiris is a selfbot for revolt.chat, built using Node.js and websockets.
 
 Osiris was made to enhance the user experience on revolt.chat!
-
+esdy
 ## 📜 Features
 
 - You can make your own custom commands!
