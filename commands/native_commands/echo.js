@@ -19,7 +19,7 @@ function execute(XSessionToken, data, sharedObj) {
   console.log(osiris);
   osiris.sendMessage(XSessionToken, Channel, `${Arguments[1]}`).then((message) => {
     console.log("[REVOLT]: SENT 'PONG'!");
-  });
+  }).catch((err) => console.log(err))
 }
 
 module.exports = {

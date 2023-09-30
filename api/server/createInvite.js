@@ -1,25 +1,21 @@
 /**
- * This function creates a server
+ * This function creates an invite
  * @param {string} SessionToken - The session token retrieved from the Login() function.
- * @param {string} Name - The server's name
- * @param {string} Description - The server's description
- * @param {boolean} NSFWState - true/false
+ * @param {string} RoleId - The role's id
+ * @param {string} Channel - The channel to create an invite for
  */
 
 const axios = require("axios");
 const ulid = require("ulid");
-const { SendMessage } = require("./sendMessage");
+const { SendMessage } = require("../user/sendMessage");
+const { SendMessageWithEmbed } = require("../user/sendMessageWithEmbed");
 
-function CreateServer(SessionToken, Name, Description, NSFWState) {
+function CreateInvite(SessionToken, Channel) {
   return new Promise((resolve, reject) => {
     axios({
       method: "POST",
-      url: `https://api.revolt.chat/servers/create`,
-      data: { 
-        name: Name,
-        description: Description,
-        nsfw: NSFWState
-      },
+      url: `https://api.revolt.chat/channels/${Channel}/invites`,
+      data: { },
       headers: {
         Host: "api.revolt.chat",
         Connection: "keep-alive",
@@ -40,7 +36,16 @@ function CreateServer(SessionToken, Name, Description, NSFWState) {
       Referer: "https://app.revolt.chat/",
     })
       .then((response) => {
-        console.log("[REVOLT]: CREATED SERVER")
+        console.log("[REVOLT]: CREATED INVITE");
+        //return resolve(response.data._id);
+        SendMessageWithEmbed(SessionToken, Channel, "", {
+          EmbedTitle: "osiris | created invite!",
+          EmbedDescription: `https://rvlt.gg/${response.data._id}`,
+          EmbedColour: "#a81808"
+        }).catch((err) => console.log(err));
+        //SendMessage(SessionToken, Channel, `Successfully created invite! https://rvlt.gg/${response.data._id}`).then((message) => {
+         //   console.log("[REVOLT]: SENT!");
+        //})
       })
       .catch((response) => {
         console.log(response);
@@ -49,4 +54,4 @@ function CreateServer(SessionToken, Name, Description, NSFWState) {
   });
 }
 
-module.exports = { CreateServer };
+module.exports = { CreateInvite };

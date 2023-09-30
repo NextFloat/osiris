@@ -8,7 +8,7 @@
 
 const axios = require("axios");
 const ulid = require("ulid");
-const { SendMessage } = require("./sendMessage");
+const { SendMessage } = require("../user/sendMessage");
 
 function DeleteRole(SessionToken, Server, RoleId, Channel) {
   return new Promise((resolve, reject) => {

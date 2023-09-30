@@ -9,6 +9,14 @@ function execute(XSessionToken, data, sharedObj) {
     "Welcome home, great Slayer.",
   ];
 
+  osiris.embed(XSessionToken, Channel, "", {
+    EmbedTitle: "osiris | doom quote",
+    EmbedDescription: `${Quotes[Math.floor(Math.random() * Quotes.length)]}`,
+    EmbedColour: "#a81808"
+  }).then((msg) => console.log("[REVOLT]: SENT")).catch((err) => console.log(err));
+  
+} 
+/** 
   osiris.sendMessage(
     XSessionToken,
     Channel,
@@ -16,7 +24,7 @@ function execute(XSessionToken, data, sharedObj) {
   ).then((message) => {
     console.log("[REVOLT]: SENT!");
   });
-}
+}*/
 
 module.exports = {
   name: "doomquote",
