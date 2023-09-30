@@ -10,7 +10,7 @@ const nodeBashTitle = require("node-bash-title"); // npm install node-bash-title
 const { exec } = require('child_process');    
 // Require custom revolt API functions
 const { osiris } = require("./api/osiris.js");
-
+//
 const fs = require("fs");
 const path = require("path");
 
