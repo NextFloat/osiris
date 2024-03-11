@@ -48,15 +48,6 @@ async function checkRepoStatus() {
     console.log('No remote changes. All files are up to date.');
   }
 }
-// Function to check if local files are outdated compared to the remote GitHub repo
-async function checkRepoStatus() {
-  const remoteChanges = await areRemoteChanges();
-  if (remoteChanges) {
-    console.log('There are remote changes. Some files may be outdated.');
-  } else {
-    console.log('No remote changes. All files are up to date.');
-  }
-}
 
 // Function to import all commands from the commands folder
 function importCommands() {
